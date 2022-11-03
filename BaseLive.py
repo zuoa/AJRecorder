@@ -1,6 +1,4 @@
-import os
 import datetime
-import logging
 import abc
 import requests
 from requests.adapters import HTTPAdapter
