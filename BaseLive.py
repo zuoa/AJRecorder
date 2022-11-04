@@ -4,10 +4,11 @@ import requests
 from requests.adapters import HTTPAdapter
 from logger import Logger
 
+logger = Logger(__name__).get_logger()
+
 
 class BaseLive(metaclass=abc.ABCMeta):
     def __init__(self, config: dict, room_id):
-        self.logger = Logger(__name__).get_logger()
         default_headers = {
             'Accept': 'application/json, text/javascript, */*; q=0.01',
             'Accept-Encoding': 'gzip, deflate',
@@ -26,7 +27,7 @@ class BaseLive(metaclass=abc.ABCMeta):
         self.__live_url = ''
         self.__allowed_check_interval = datetime.timedelta(seconds=config.get('root', {}).get('check_interval', 60))
         self.room_info = self._get_room_info()
-        self.logger.debug(f"Room info: {self.room_info}")
+        logger.debug(f"Room info: {self.room_info}")
 
     @abc.abstractmethod
     def _get_room_info(self):
@@ -43,19 +44,17 @@ class BaseLive(metaclass=abc.ABCMeta):
     @property
     def live_status(self) -> bool:
         if datetime.datetime.now() - self.__last_check_time >= self.__allowed_check_interval:
-            self.logger.debug("允许检查")
-            print("允许检查")
+            logger.debug("允许检查")
             self.__live_status = self._get_live_status()
         else:
-            self.logger.debug("间隔不足，使用过去状态")
-            print("间隔不足，使用过去状态")
+            logger.debug("间隔不足，使用过去状态")
         return self.__live_status
 
     @property
     def live_url(self) -> str:
         if datetime.datetime.now() - self.__last_check_time >= self.__allowed_check_interval:
-            self.logger.debug("允许检查")
+            logger.info("允许检查")
             self.__live_url = self._get_live_url()
         else:
-            self.logger.debug("间隔不足，使用过去状态")
+            logger.info("间隔不足，使用过去状态")
         return self.__live_url

@@ -12,7 +12,6 @@ class DouyuLive(BaseLive):
     def __init__(self, room_id):
         super().__init__({}, room_id)
         self.logger = Logger(__name__).get_logger()
-        self.logger.debug('1111111')
 
     def _get_room_info(self):
         url = 'https://open.douyucdn.cn/api/RoomApi/room/%s' % self.room_id
@@ -44,7 +43,6 @@ class DouyuLive(BaseLive):
         return _danmu_monitor, _stream_recorder
 
     def _run(self):
-        self.logger.debug('1111111')
         recorder = BaseRecorder()
         recorder_thread = threading.Thread(target=recorder.run, args=(self,))
         recorder_thread.setDaemon(True)

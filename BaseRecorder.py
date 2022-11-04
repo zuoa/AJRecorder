@@ -1,3 +1,4 @@
+import os
 import re
 import time
 
@@ -16,7 +17,6 @@ class BaseRecorder:
 
         try:
             config = {}
-            # logging.info(self.generate_log('√ 正在录制...' + self.room_id))
             default_headers = {
                 'Accept-Encoding': 'identity',
                 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.115 Safari/537.36 ',
@@ -27,8 +27,7 @@ class BaseRecorder:
             headers = {**default_headers, **config.get('root', {}).get('request_header', {})}
             resp = requests.get(record_url, stream=True,
                                 headers=headers,
-                                timeout=config.get(
-                                    'root', {}).get('check_interval', 60))
+                                timeout=config.get('root', {}).get('check_interval', 60))
             with open(output_filename, "wb") as f:
                 for chunk in resp.iter_content(chunk_size=1024):
                     if chunk:
@@ -39,7 +38,11 @@ class BaseRecorder:
         self.logger.info('Stop recording...')
 
     def generate_filename(self, room_id: str) -> str:
-        return f"{room_id}_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.flv"
+        file_path = f"video_src/{room_id}/{room_id}_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.flv"
+        if not os.path.exists(os.path.dirname(file_path)):
+            os.makedirs(os.path.dirname(file_path))
+
+        return file_path
 
     def run(self, live):
         while True:
