@@ -4,7 +4,7 @@ import time
 
 import execjs
 import requests
-
+from logger import Logger
 
 class DouYu:
     """
@@ -31,6 +31,8 @@ class DouYu:
         self.s = requests.Session()
         self.res = self.s.get('https://m.douyu.com/' + str(rid)).text
         result = re.search(r'rid":(\d{1,7}),"vipId', self.res)
+
+        self.logger = Logger(__name__).get_logger()
 
         if result:
             self.rid = result.group(1)
@@ -119,9 +121,12 @@ class DouYu:
         if error == 0:
             pass
         elif error == 102:
-            raise Exception('房间不存在')
+            self.logger.error('房间不存在')
         elif error == 104:
-            raise Exception('房间未开播')
+            self.logger.error('房间未开播')
         else:
             key = self.get_js()
-        return "https://akm-tct.douyucdn.cn/live/{}.flv?uuid=".format(key)
+        if key:
+            return "https://akm-tct.douyucdn.cn/live/{}.flv?uuid=".format(key)
+        else:
+            return None

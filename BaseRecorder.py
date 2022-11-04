@@ -1,4 +1,6 @@
 import re
+import time
+
 import requests
 import datetime
 from logger import Logger
@@ -41,4 +43,7 @@ class BaseRecorder:
 
     def run(self, live):
         while True:
-            self.record(live.live_url, self.generate_filename(live.room_id))
+            if live.live_status:
+                self.record(live.live_url, self.generate_filename(live.room_id))
+            else:
+                time.sleep(30)

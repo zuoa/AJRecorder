@@ -26,7 +26,7 @@ class BaseLive(metaclass=abc.ABCMeta):
         self.__live_url = ''
         self.__allowed_check_interval = datetime.timedelta(seconds=config.get('root', {}).get('check_interval', 60))
         self.room_info = self._get_room_info()
-        self.logi(f"Room info: {self.room_info}")
+        self.logger.debug(f"Room info: {self.room_info}")
 
     @abc.abstractmethod
     def _get_room_info(self):
@@ -43,26 +43,19 @@ class BaseLive(metaclass=abc.ABCMeta):
     @property
     def live_status(self) -> bool:
         if datetime.datetime.now() - self.__last_check_time >= self.__allowed_check_interval:
-            self.logd("允许检查")
+            self.logger.debug("允许检查")
+            print("允许检查")
             self.__live_status = self._get_live_status()
         else:
-            self.logd("间隔不足，使用过去状态")
+            self.logger.debug("间隔不足，使用过去状态")
+            print("间隔不足，使用过去状态")
         return self.__live_status
 
     @property
     def live_url(self) -> str:
         if datetime.datetime.now() - self.__last_check_time >= self.__allowed_check_interval:
-            self.logd("允许检查")
+            self.logger.debug("允许检查")
             self.__live_url = self._get_live_url()
         else:
-            self.logd("间隔不足，使用过去状态")
+            self.logger.debug("间隔不足，使用过去状态")
         return self.__live_url
-
-    def logd(self, content: str) -> None:
-        self.logger.debug(f"[{self.room_info['site_name']}][{self.room_info['room_owner']}({self.room_id})] {content}")
-
-    def logi(self, content: str) -> None:
-        self.logger.debug(f"[{self.room_info['site_name']}][{self.room_info['room_owner']}({self.room_id})] {content}")
-
-    def loge(self, content: str) -> None:
-        self.logger.debug(f"[{self.room_info['site_name']}][{self.room_info['room_owner']}({self.room_id})] {content}")
