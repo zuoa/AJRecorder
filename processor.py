@@ -30,7 +30,7 @@ class Processor(object):
                     if file_start_time <= start_time < file_end_time:
                         return file_dir + file, (start_time - file_start_time).total_seconds(), (
                                 end_time - file_start_time).total_seconds()
-        return None
+        return None, None, None
 
     def cut(self, start_time, end_time, tag):
         input_file, start_offset, end_offset = self.find_source_video(start_time, end_time)
@@ -56,6 +56,10 @@ class Processor(object):
         return self.process(data)
 
 
-processor = Processor(None, None)
-cut_file = processor.cut("2022-11-04 10:45:00", "2022-11-04 10:50:00", "阿正啊")
+class YClass( object ):
+    pass
+lll = YClass()
+setattr(lll, 'room_id', '73965')
+processor = Processor(lll, None)
+cut_file = processor.cut("2022-11-06 21:16:00", "2022-11-06 21:30:00", "gbtc")
 print(cut_file)

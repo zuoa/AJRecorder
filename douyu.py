@@ -14,7 +14,7 @@ class DouyuLive(BaseLive):
     def __init__(self, room_id):
         super().__init__({}, room_id)
         self.logger = Logger(__name__).get_logger()
-        self.command_queue = Queue()
+        # self.command_queue = Queue()
 
     def _get_room_info(self):
         url = 'https://open.douyucdn.cn/api/RoomApi/room/%s' % self.room_id
@@ -30,7 +30,7 @@ class DouyuLive(BaseLive):
     def _get_live_status(self) -> bool:
         url = 'https://open.douyucdn.cn/api/RoomApi/room/%s' % self.room_id
         resp_json = self.session.get(url).json()
-        return resp_json['data']['room_status'] == '1'
+        return resp_json['data']['room_status'] == '1' and resp_json['data']['online'] != '0'
 
     def _create_thread_fn(self):
         def _danmu_monitor(self):
@@ -52,6 +52,7 @@ class DouyuLive(BaseLive):
         def _stream_recorder(self):
             recorder = BaseRecorder()
             recorder.run(self)
+
         def _post_processor(self):
             recorder = BaseRecorder()
             recorder.run(self)

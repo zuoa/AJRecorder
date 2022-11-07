@@ -47,6 +47,10 @@ class BaseRecorder:
     def run(self, live):
         while True:
             if live.live_status:
-                self.record(live.live_url, self.generate_filename(live.room_id))
-            else:
-                time.sleep(30)
+                live_url = live.live_url
+                if live_url:
+                    self.record(live_url, self.generate_filename(live.room_id))
+                    time.sleep(5)
+                    continue
+
+            time.sleep(30)

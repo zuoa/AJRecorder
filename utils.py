@@ -17,6 +17,5 @@ def get_video_duration(filename):
     finally:
         if clip:
             clip.close()
+    print(file_time)
     return file_time
-
-
