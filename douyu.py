@@ -1,20 +1,22 @@
 import time
+import re
 import threading
+import sqlite3
+from multiprocessing import Process
+from queue import Queue
+from logger import Logger
+
 from BaseLive import BaseLive
 from realurl.douyu import DouYu
-from multiprocessing import Process
-
-from logger import Logger
+from processor import Processor
 from BaseRecorder import BaseRecorder
 from danmu.douyu import DouyuClient
-from queue import Queue
 
 
 class DouyuLive(BaseLive):
     def __init__(self, room_id):
         super().__init__({}, room_id)
         self.logger = Logger(__name__).get_logger()
-        # self.command_queue = Queue()
 
     def _get_room_info(self):
         url = 'https://open.douyucdn.cn/api/RoomApi/room/%s' % self.room_id
@@ -33,43 +35,84 @@ class DouyuLive(BaseLive):
         return resp_json['data']['room_status'] == '1' and resp_json['data']['online'] != '0'
 
     def _create_thread_fn(self):
-        def _danmu_monitor(self):
+        def _danmu_monitor(self, command_queue):
             client = DouyuClient(self.room_id)
+            db = sqlite3.connect("danmu.db")
+            db_cursor = db.cursor()
+            table_name = 'douyu_%s' % self.room_id
+            db_cursor.execute("CREATE TABLE IF NOT EXISTS " + table_name +
+                              " ('id' INTEGER PRIMARY KEY autoincrement, \
+                               'uid' TEXT NOT NULL,'name' TEXT NOT NULL,'badge' TEXT, 'level' INTEGER,\
+                               'type' TEXT NOT NULL, 'content' TEXT,'color' TEXT,  'room_id' TEXT,\
+                               'room_owner' TEXT, msg_time TIMESTAMP,\
+                               'gmt_create' TIMESTAMP default (datetime('now', 'localtime')))", )
 
             @client.danmu
             def danmu(message):
+                db_cursor.execute("INSERT INTO " + table_name +
+                                  "('uid', 'name', 'badge', 'level', 'type', 'content', 'color', 'room_id',\
+                                   'room_owner', 'msg_time')\
+                                   VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                                  (message['uid'], message['nick_name'], message['badge'], message['level'],
+                                   message['msg_type'],
+                                   message['content'],
+                                   message['color'],
+                                   message['room_id'], message['room_owner'],
+                                   message['msg_time']))
+                db.commit()
+
                 if message["uid"] == "22374061":
                     content = message["content"]
                     msg_time = message["msg_time"]
-                    if content.startswith("#cut"):
-                        content_split = content.split(" ")
+                    if content.startswith("##"):
                         print(content)
-                        print(msg_time)
-                        self.command_queue.put(content_split)
+                        command_queue.put(content)
 
             client.start()
 
-        def _stream_recorder(self):
+        def _stream_recorder(self, command_queue):
             recorder = BaseRecorder()
             recorder.run(self)
 
-        def _post_processor(self):
-            recorder = BaseRecorder()
-            recorder.run(self)
+        def _post_processor(self, command_queue):
+            processor = Processor(self, None)
+            while True:
+                command = command_queue.get()
+                if command:
+                    print(command)
+                    command = re.sub(' +', ' ', command)
+                    command_split = command.split(" ")
+                    print(command_split)
+                    tag = ""
+                    forward_time = 30
+
+                    tag = command_split[1].replace("#", "")
+                    if len(command_split) == 2:
+                        forward_time = int(command_split[1])
+
+                    processor.cut()
+                time.sleep(5)
 
         return _danmu_monitor, _stream_recorder, _post_processor
 
     def _run(self):
+        command_queue = Queue()
+
         danmu_monitor, stream_recorder, post_processor = self._create_thread_fn()
 
-        danmu_monitor_thread = threading.Thread(target=danmu_monitor, args=(self,))
+        danmu_monitor_thread = threading.Thread(target=danmu_monitor, args=(self, command_queue,))
         danmu_monitor_thread.setDaemon(True)
         danmu_monitor_thread.start()
 
-        stream_recorder_thread = threading.Thread(target=stream_recorder, args=(self,))
+        stream_recorder_thread = threading.Thread(target=stream_recorder, args=(self, command_queue,))
         stream_recorder_thread.setDaemon(True)
         stream_recorder_thread.start()
 
+        processor_thread = threading.Thread(target=post_processor, args=(self, command_queue,))
+        processor_thread.setDaemon(True)
+        processor_thread.start()
+
+        processor_thread.join()
         stream_recorder_thread.join()
         danmu_monitor_thread.join()
 

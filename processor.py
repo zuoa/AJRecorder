@@ -1,8 +1,11 @@
 import os
 import datetime
+import sqlite3
 import re
 
 from utils import get_video_duration
+from danmu.DanmuDB import DanmuDB
+from danmu.DanmuAss import Ass
 
 
 class Processor(object):
@@ -49,17 +52,36 @@ class Processor(object):
 
         return output_file
 
-    def process(self, data):
-        raise NotImplementedError
+    def generate_ass(self, start_time, end_time, tag):
+        simple_start_time = re.sub("\D", "", start_time)
+        simple_end_time = re.sub("\D", "", end_time)
+        ass_file = f"dist/{self.live.room_id}/{tag}_{simple_start_time}_{simple_end_time}.ass"
 
-    def __call__(self, data):
-        return self.process(data)
+        db = DanmuDB(self.live.room_id)
+        danmu_list = db.query(start_time, end_time)
+        ass = Ass(danmu_list, start_time, ass_file)
+        ass.flush()
+
+        return ass_file
+
+    def process(self, start_time, end_time, tag):
+        video_file_path = self.cut(start_time, end_time, tag)
+        if not video_file_path:
+            return
+        ass_file_path = self.generate_ass(start_time, end_time, tag)
+        command = f"{self.ffmpeg} -i {video_file_path}  -vf ass={ass_file_path} -threads 4 -preset fast -c:a copy {video_file_path}.withass.mp4"
+        print(command)
+        os.system(command)
 
 
-class YClass( object ):
+class YClass(object):
     pass
-lll = YClass()
-setattr(lll, 'room_id', '73965')
-processor = Processor(lll, None)
-cut_file = processor.cut("2022-11-06 21:16:00", "2022-11-06 21:30:00", "gbtc")
-print(cut_file)
+
+
+if __name__ == '__main__':
+    lll = YClass()
+    setattr(lll, 'room_id', '73965')
+    processor = Processor(lll, None)
+    processor.process("2022-11-08 12:30:00", "2022-11-08 12:40:00", "test")
+    # cut_file = processor.cut("2022-11-07 23:10:00", "2022-11-08 01:30:00", "ldc")
+    # print(cut_file)

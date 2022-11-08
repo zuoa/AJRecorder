@@ -130,6 +130,15 @@ class DouyuCore(object):
         wrapper_msg['badge'] = msg.get('bnn', '')
         wrapper_msg['level'] = msg.get('level', None)
         wrapper_msg['content'] = msg.get('txt', '')
+        wrapper_msg['color'] = {
+            '0': '#FFFFFF',
+            '1': '#FF0000',
+            '2': '#1e87f0',
+            '3': '#7ac84b',
+            '4': '#ff7f00',
+            '5': '#9b39f4',
+            '6': '#ff69b4'
+        }.get(msg.get('col', '0'), '#FFFFFF').upper()
 
         wrapper_msg['msg_time'] = datetime.datetime.fromtimestamp(
             int(int(msg['cst']) / 1000)) if 'cst' in msg else datetime.datetime.now()
@@ -157,7 +166,7 @@ class DouyuCore(object):
         try:
             fn(wrapper_msg)
         except Exception as ex:
-            print(ex)
+            print(ex, wrapper_msg)
 
     def __on_stop(self):
         pass
@@ -229,6 +238,3 @@ class DouyuClient(DouyuCore):
     def anbc(self, fn):
         self.__register(fn, 'vip')
         return fn
-
-
-
