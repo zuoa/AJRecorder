@@ -32,25 +32,32 @@ class BaseRecorder:
                 for chunk in resp.iter_content(chunk_size=1024):
                     if chunk:
                         f.write(chunk)
+                        f.flush()
         except Exception as e:
             self.logger.error('Error while recording:' + str(e))
 
         self.logger.info('Stop recording...')
 
-    def generate_filename(self, room_id: str) -> str:
-        file_path = f"video_src/{room_id}/{room_id}_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.flv"
-        if not os.path.exists(os.path.dirname(file_path)):
-            os.makedirs(os.path.dirname(file_path))
+    def generate_filename(self, live) -> str:
+        video_source_dir = live.config.get('common', {}).get('video_source_dir', 'video_src')
+        filepath = f"{video_source_dir}/{live.room_id}/{live.room_id}_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.flv"
+        if not os.path.exists(os.path.dirname(filepath)):
+            os.makedirs(os.path.dirname(filepath))
 
-        return file_path
+        return filepath
 
-    def run(self, live):
+    def run(self, live, command_queue):
         while True:
             if live.live_status:
                 live_url = live.live_url
                 if live_url:
-                    self.record(live_url, self.generate_filename(live.room_id))
+                    record_filepath = self.generate_filename(live)
+                    self.record(live_url, record_filepath)
                     time.sleep(5)
+                    if os.path.getsize(record_filepath) > 1024 * 1024:
+                        command_queue.put({'type': 'full', 'filepath': record_filepath})
+                    else:
+                        os.remove(record_filepath)
                     continue
 
             time.sleep(30)

@@ -44,7 +44,7 @@ class DanmuWSClient:
             self._on_message(msg_decompressed)
 
     def __on_error(self, ws, error):
-        print(error)
+        print("error:", error)
 
     def __msg_encode(self, msg):
         # 头部8字节，尾部1字节，与字符串长度相加即数据长度
@@ -146,6 +146,7 @@ class DouyuCore(object):
         wrapper_msg['msg_type'] = {'dgb': 'gift',
                                    'chatmsg': 'danmu',
                                    'anbc': 'vip',
+                                   'rss': 'online',
                                    'uenter': 'enter'}.get(msg['type'], 'other')
 
         wrapper_msg['gift_id'] = msg.get('gfid', None)
@@ -235,6 +236,10 @@ class DouyuClient(DouyuCore):
         self.__register(fn, 'enter')
         return fn
 
-    def anbc(self, fn):
+    def online(self, fn):
+        self.__register(fn, 'online')
+        return fn
+
+    def vip(self, fn):
         self.__register(fn, 'vip')
         return fn

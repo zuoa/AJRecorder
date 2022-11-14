@@ -1,31 +1,44 @@
 import datetime
 import abc
+import json
 import requests
 from requests.adapters import HTTPAdapter
 from logger import Logger
+from uploader import Uploader
 
 logger = Logger(__name__).get_logger()
 
 
 class BaseLive(metaclass=abc.ABCMeta):
-    def __init__(self, config: dict, room_id):
-        default_headers = {
-            'Accept': 'application/json, text/javascript, */*; q=0.01',
-            'Accept-Encoding': 'gzip, deflate',
-            'Accept-Language': 'zh-CN,zh;q=0.8,en-US;q=0.6,en;q=0.4,zh-TW;q=0.2',
-            'Connection': 'keep-alive',
-            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.115 Safari/537.36 '
-        }
-        self.headers = {**default_headers, **config.get('root', {}).get('request_header', {})}
+    _config = {}
+    room_info = {}
+
+    def __init__(self, room_id):
+        self.room_id = room_id
+
         self.session = requests.session()
         self.session.mount('https://', HTTPAdapter(max_retries=3))
-        self.room_id = room_id
-        self.config = config
+        headers = self.config.get('common', {}).get('request_header', {})
+        self.session.headers.update(headers)
+
         self.__last_check_time = datetime.datetime.now() + datetime.timedelta(
-            seconds=-config.get('root', {}).get('check_interval', 60))
+            seconds=-self.config.get('common', {}).get('check_interval', 60))
         self.__live_status = False
         self.__live_url = ''
-        self.__allowed_check_interval = datetime.timedelta(seconds=config.get('root', {}).get('check_interval', 60))
+        self.__allowed_check_interval = datetime.timedelta(
+            seconds=self.config.get('common', {}).get('check_interval', 60))
+        self.refresh_room_info()
+        self.uploader = Uploader(self)
+
+    @property
+    def config(self):
+        if not self._config:
+            with open("config.json", "r") as f:
+                self._config = json.load(f)
+
+        return self._config
+
+    def refresh_room_info(self):
         self.room_info = self._get_room_info()
         logger.debug(f"Room info: {self.room_info}")
 
@@ -44,10 +57,7 @@ class BaseLive(metaclass=abc.ABCMeta):
     @property
     def live_status(self) -> bool:
         if datetime.datetime.now() - self.__last_check_time >= self.__allowed_check_interval:
-            logger.debug("允许检查")
             self.__live_status = self._get_live_status()
-        else:
-            logger.debug("间隔不足，使用过去状态")
         return self.__live_status
 
     @property

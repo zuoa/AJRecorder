@@ -8,15 +8,16 @@ from logger import Logger
 
 from BaseLive import BaseLive
 from realurl.douyu import DouYu
-from processor import Processor
 from BaseRecorder import BaseRecorder
 from danmu.douyu import DouyuClient
 
 
 class DouyuLive(BaseLive):
-    def __init__(self, room_id):
-        super().__init__({}, room_id)
+
+    def __init__(self, room_id, tags=None):
+        super().__init__(room_id)
         self.logger = Logger(__name__).get_logger()
+        self.tags = tags
 
     def _get_room_info(self):
         url = 'https://open.douyucdn.cn/api/RoomApi/room/%s' % self.room_id
@@ -24,7 +25,9 @@ class DouyuLive(BaseLive):
         return {'site_name': '斗鱼',
                 'site_domain': 'douyu.com',
                 'room_id': self.room_id,
-                'room_owner': resp_json['data']['owner_name']}
+                'room_owner': resp_json['data']['owner_name'],
+                'cate_name': resp_json['data']['cate_name'],
+                'room_name': resp_json['data']['room_name']}
 
     def _get_live_url(self):
         return DouYu(self.room_id).get_real_url()
@@ -47,6 +50,13 @@ class DouyuLive(BaseLive):
                                'room_owner' TEXT, msg_time TIMESTAMP,\
                                'gmt_create' TIMESTAMP default (datetime('now', 'localtime')))", )
 
+            @client.online
+            def online(message):
+                print("online", message)
+                self.__live_status = message["original_msg"]["ss"] == '1'
+                if self.__live_status:
+                    self.refresh_room_info()
+
             @client.danmu
             def danmu(message):
                 db_cursor.execute("INSERT INTO " + table_name +
@@ -66,39 +76,30 @@ class DouyuLive(BaseLive):
                     msg_time = message["msg_time"]
                     if content.startswith("##"):
                         print(content)
-                        command_queue.put(content)
+                        # command_queue.put(content)
 
             client.start()
 
         def _stream_recorder(self, command_queue):
             recorder = BaseRecorder()
-            recorder.run(self)
+            recorder.run(self, command_queue)
 
-        def _post_processor(self, command_queue):
-            processor = Processor(self, None)
+        def _post_uploader(self, command_queue):
             while True:
                 command = command_queue.get()
                 if command:
-                    print(command)
-                    command = re.sub(' +', ' ', command)
-                    command_split = command.split(" ")
-                    print(command_split)
-                    tag = ""
-                    forward_time = 30
+                    command_type = command["type"]
+                    if command_type == "full":
+                        self.uploader.upload(command["filepath"])
 
-                    tag = command_split[1].replace("#", "")
-                    if len(command_split) == 2:
-                        forward_time = int(command_split[1])
-
-                    processor.cut()
                 time.sleep(5)
 
-        return _danmu_monitor, _stream_recorder, _post_processor
+        return _danmu_monitor, _stream_recorder, _post_uploader
 
     def _run(self):
         command_queue = Queue()
 
-        danmu_monitor, stream_recorder, post_processor = self._create_thread_fn()
+        danmu_monitor, stream_recorder, post_uploader = self._create_thread_fn()
 
         danmu_monitor_thread = threading.Thread(target=danmu_monitor, args=(self, command_queue,))
         danmu_monitor_thread.setDaemon(True)
@@ -108,11 +109,11 @@ class DouyuLive(BaseLive):
         stream_recorder_thread.setDaemon(True)
         stream_recorder_thread.start()
 
-        processor_thread = threading.Thread(target=post_processor, args=(self, command_queue,))
-        processor_thread.setDaemon(True)
-        processor_thread.start()
+        post_uploader_thread = threading.Thread(target=post_uploader, args=(self, command_queue,))
+        post_uploader_thread.setDaemon(True)
+        post_uploader_thread.start()
 
-        processor_thread.join()
+        post_uploader_thread.join()
         stream_recorder_thread.join()
         danmu_monitor_thread.join()
 
