@@ -8,7 +8,7 @@ from logger import Logger
 
 from BaseLive import BaseLive
 from realurl.douyu import DouYu
-from BaseRecorder import BaseRecorder
+from recorder import FlvRecorder
 from danmu.douyu import DouyuClient
 
 
@@ -81,7 +81,7 @@ class DouyuLive(BaseLive):
             client.start()
 
         def _stream_recorder(self, command_queue):
-            recorder = BaseRecorder()
+            recorder = FlvRecorder()
             recorder.run(self, command_queue)
 
         def _post_uploader(self, command_queue):

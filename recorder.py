@@ -7,7 +7,7 @@ import datetime
 from logger import Logger
 
 
-class BaseRecorder:
+class FlvRecorder:
     def __init__(self):
         self.logger = Logger(__name__).get_logger()
 

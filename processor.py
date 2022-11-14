@@ -1,11 +1,37 @@
 import os
 import datetime
-import sqlite3
+import subprocess
 import re
+import traceback
 
 from utils import get_video_duration, get_video_real_duration
 from danmu.DanmuDB import DanmuDB
 from danmu.DanmuAss import Ass
+
+
+def flv2ts(input_file, output_file=None, is_overlying_barrage=False, std_handler=None):
+    if not output_file:
+        output_file = input_file + ".ts"
+
+    try:
+        ret = subprocess.run(
+            f"ffmpeg -y -fflags +discardcorrupt -i {input_file} -c copy -bsf:v h264_mp4toannexb -acodec aac -f mpegts {output_file}",
+            shell=True, check=True, stdout=std_handler, stderr=std_handler)
+        return ret
+    except subprocess.CalledProcessError as err:
+        traceback.print_exc()
+        return err
+
+
+def concat(merge_conf_path: str, merged_file_path: str, ffmpeg_logfile_handler):
+    try:
+        ret = subprocess.run(
+            f"ffmpeg -y -f concat -safe 0 -i {merge_conf_path} -c copy -fflags +igndts -avoid_negative_ts make_zero {merged_file_path}",
+            shell=True, check=True, stdout=ffmpeg_logfile_handler, stderr=ffmpeg_logfile_handler)
+        return ret
+    except subprocess.CalledProcessError as err:
+        traceback.print_exc()
+        return err
 
 
 class Processor(object):
