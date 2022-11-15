@@ -4,9 +4,13 @@ import threading
 import sqlite3
 from multiprocessing import Process
 from queue import Queue
+
+import requests
+
 from logger import Logger
 
 from BaseLive import BaseLive
+from processor import Processor
 from realurl.douyu import DouYu
 from recorder import FlvRecorder
 from danmu.douyu import DouyuClient
@@ -56,6 +60,9 @@ class DouyuLive(BaseLive):
                 self.__live_status = message["original_msg"]["ss"] == '1'
                 if self.__live_status:
                     self.refresh_room_info()
+                    requests.post(f'https://sctapi.ftqq.com/{self.config["push_key"]}.send',
+                                  {"title": "斗鱼直播间开播通知",
+                                   "desc": f"房间号：{self.room_id}，房间名：{self.room_info['room_name']}，主播：{self.room_info['room_owner']}，分类：{self.room_info['cate_name']}"})
 
             @client.danmu
             def danmu(message):
@@ -95,8 +102,8 @@ class DouyuLive(BaseLive):
                 time.sleep(5)
 
         def _process_timer(self, command_queue):
-            while True:
-                time.sleep(30 * 60)
+            processor = Processor(self)
+            processor.process_scheduled()
 
         return _danmu_monitor, _stream_recorder, _post_uploader, _process_timer
 
