@@ -72,7 +72,7 @@ class Uploader(object):
 
 
 if __name__ == '__main__':
-    from douyu import DouyuLive
+    from DouyuLive import DouyuLive
 
     Uploader(DouyuLive("73965")).upload("video_src/73965/73965_20221114_112900.flv",
                                         title="【正宝TV】20221114 舞力全开 白日舞王", tags=["孙正"])

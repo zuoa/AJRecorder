@@ -94,12 +94,16 @@ class DouyuLive(BaseLive):
 
                 time.sleep(5)
 
-        return _danmu_monitor, _stream_recorder, _post_uploader
+        def _process_timer(self, command_queue):
+            while True:
+                time.sleep(30 * 60)
+
+        return _danmu_monitor, _stream_recorder, _post_uploader, _process_timer
 
     def _run(self):
         command_queue = Queue()
 
-        danmu_monitor, stream_recorder, post_uploader = self._create_thread_fn()
+        danmu_monitor, stream_recorder, post_uploader, process_timer = self._create_thread_fn()
 
         danmu_monitor_thread = threading.Thread(target=danmu_monitor, args=(self, command_queue,))
         danmu_monitor_thread.setDaemon(True)
@@ -113,6 +117,11 @@ class DouyuLive(BaseLive):
         post_uploader_thread.setDaemon(True)
         post_uploader_thread.start()
 
+        process_timer_thread = threading.Thread(target=process_timer, args=(self, command_queue,))
+        process_timer_thread.setDaemon(True)
+        process_timer_thread.start()
+
+        process_timer_thread.join()
         post_uploader_thread.join()
         stream_recorder_thread.join()
         danmu_monitor_thread.join()

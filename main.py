@@ -1,4 +1,4 @@
-from douyu import DouyuLive
+from DouyuLive import DouyuLive
 
 if __name__ == '__main__':
 

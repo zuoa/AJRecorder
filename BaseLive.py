@@ -4,6 +4,7 @@ import json
 import requests
 from requests.adapters import HTTPAdapter
 from logger import Logger
+from processor import Processor
 from uploader import Uploader
 
 logger = Logger(__name__).get_logger()
@@ -29,6 +30,7 @@ class BaseLive(metaclass=abc.ABCMeta):
             seconds=self.config.get('common', {}).get('check_interval', 60))
         self.refresh_room_info()
         self.uploader = Uploader(self)
+        self.uploader = Processor(self)
 
     @property
     def config(self):
