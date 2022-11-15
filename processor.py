@@ -2,6 +2,7 @@ import os
 import datetime
 import subprocess
 import re
+import time
 import traceback
 
 from utils import get_video_duration, get_video_real_duration
@@ -61,6 +62,34 @@ class Processor(object):
                         return file_dir + file, (start_time - file_start_time).total_seconds(), (
                                 end_time - file_start_time).total_seconds()
         return None, None, None
+
+    def match_source_video(self, start_time_str, end_time_str):
+        start_time = datetime.datetime.strptime(start_time_str, "%Y-%m-%d %H:%M:%S")
+        end_time = datetime.datetime.strptime(end_time_str, "%Y-%m-%d %H:%M:%S")
+        print(start_time, end_time)
+        file_match_map = {}
+        file_dir = f"{self.video_source_dir}/{self.live.room_id}/"
+        for root, dirs, files in os.walk(file_dir):
+            for file in files:
+                if file.startswith(self.live.room_id) and file.endswith(".flv"):
+                    file_duration = get_video_real_duration(file_dir + file)
+                    f_split = file.split("_")
+                    file_start_time_str = (f_split[1] + f_split[2]).replace(".flv", "")
+                    file_start_time = datetime.datetime.strptime(file_start_time_str, "%Y%m%d%H%M%S")
+                    file_end_time = file_start_time + datetime.timedelta(seconds=file_duration)
+                    print(file_start_time_str, file_duration)
+
+                    if file_start_time <= start_time < file_end_time:
+                        if file_dir + file not in file_match_map:
+                            file_match_map[file_dir + file] = {"start": 0.0, "end": file_duration}
+                        file_match_map[file_dir + file]["start"] = (start_time - file_start_time).total_seconds()
+
+                    if file_start_time <= end_time < file_end_time:
+                        if file_dir + file not in file_match_map:
+                            file_match_map[file_dir + file] = {"start": 0.0, "end": file_duration}
+                        file_match_map[file_dir + file]["end"] = (end_time - file_start_time).total_seconds()
+
+        return file_match_map
 
     def cut(self, start_time, end_time, tag):
         input_file, start_offset, end_offset = self.find_source_video(start_time, end_time)
@@ -129,6 +158,17 @@ class Processor(object):
 
     def process_file(self, filepath):
         self.cut_file(filepath)
+
+    def process_scheduled(self, interval: int = 300):
+        while True:
+            end = time.time()
+            start = end - interval
+            start_time = datetime.datetime.fromtimestamp(start).strftime("%Y-%m-%d %H:%M:%S")
+            end_time = datetime.datetime.fromtimestamp(end).strftime("%Y-%m-%d %H:%M:%S")
+            print(start_time, end_time)
+            video_map = self.match_source_video(start_time, end_time)
+            print(video_map)
+            time.sleep(60)
 
 
 class YClass(object):

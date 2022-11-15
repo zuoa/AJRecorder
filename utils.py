@@ -37,6 +37,8 @@ def get_font_size(font_size, font_path, text):
     font = ImageFont.truetype(font_path, font_size)
     return font.getsize(text)
 
-# if __name__ == '__main__':
-#     x = get_video_duration("video_src/7828414/7828414_20221108_175406.flv")
-#     print(x, int(x / 3600), int(int(x % 3600) / 60), x % 3600 % 60)
+if __name__ == '__main__':
+    y = get_video_real_duration("/Users/yujian/data/AJRecorder/video/source/7828414/7828414_20221115_162622.flv")
+    print(y)
+    # x = get_video_duration("/Users/yujian/data/AJRecorder/video/source/7828414/7828414_20221115_161655.flv")
+    # print(x)
