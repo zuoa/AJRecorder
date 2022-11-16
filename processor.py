@@ -2,6 +2,7 @@ import os
 import datetime
 import subprocess
 import re
+import threading
 import time
 import traceback
 
@@ -35,7 +36,20 @@ def concat(merge_conf_path: str, merged_file_path: str, ffmpeg_logfile_handler):
         return err
 
 
+def ffmpeg_command(command):
+    try:
+        print(command)
+        ret = subprocess.run(command, shell=True, check=True)
+        return ret
+    except subprocess.CalledProcessError as err:
+        traceback.print_exc()
+        return err
+
+
 class Processor(object):
+    split_interval = 1800
+    split_progress_map = {}
+
     def __init__(self, live):
         self.live = live
         self.ffmpeg = self.live.config.get('common', {}).get('ffmpeg_path', '/Users/yujian/ffmpeg')
@@ -146,7 +160,7 @@ class Processor(object):
                 if not os.path.exists(os.path.dirname(cut_file)):
                     os.makedirs(os.path.dirname(cut_file))
                 # command = f"{self.ffmpeg} -ss {start_offset}  -t {end_offset - start_offset} -y -i {filepath} -threads 4 -preset fast  -c:v libx264 -c:a copy  -crf 28 -r 30 {cut_file}"
-                command = f"{self.ffmpeg} -ss {start_offset}  -t {end_offset - start_offset} -accurate_seek -y -i {filepath} -c:v copy -c:a copy -b:v 2M  -avoid_negative_ts 1 {cut_file}"
+                command = f"{self.ffmpeg} -ss {start_offset}  -t {end_offset - start_offset} -accurate_seek -y -i {filepath}  -c:v copy -c:a copy -b:v 2M  -avoid_negative_ts 1 {cut_file}"
                 print(command)
                 os.system(command)
                 if os.path.getsize(cut_file) > 10 * 1024 * 1024:
@@ -156,31 +170,87 @@ class Processor(object):
         print(cut_files)
         return cut_files
 
-    def process_file(self, filepath):
-        self.cut_file(filepath)
+    def process_file(self, filepath, start_offset, end_offset):
+        file = os.path.basename(filepath)
+        f_split = file.split("_")
+        file_start_time_str = (f_split[1] + f_split[2]).replace(".flv", "")
+        file_start_time = datetime.datetime.strptime(file_start_time_str, "%Y%m%d%H%M%S")
+        start_time = file_start_time + datetime.timedelta(seconds=start_offset)
+        end_time = file_start_time + datetime.timedelta(seconds=end_offset)
 
-    def process_scheduled(self, interval: int = 300):
+        start_time_str = start_time.strftime("%Y-%m-%d %H:%M:%S")
+        end_time_str = end_time.strftime("%Y-%m-%d %H:%M:%S")
+
+        ass_filepath = self.generate_ass(start_time_str, end_time_str, "A")
+        output_file = f'{self.video_output_dir}/{self.live.room_id}/{start_time.strftime("%Y%m%d%H%M%S")}_{end_time.strftime("%Y%m%d%H%M%S")}.ass.mp4'
+
+        command = f"{self.ffmpeg} -y  -ss {start_offset}  -t {end_offset - start_offset} -accurate_seek -i {filepath}  -vf ass={ass_filepath} -preset fast -s 1920x1080 -c:v libx264 -c:a aac  -crf 28 -r 30   -avoid_negative_ts 1 {output_file}"
+
+        # threading.Thread(target=ffmpeg_command, args=(command,)).start()
+        ffmpeg_command(command)
+        return output_file
+
+    def generate_file_title(self, filepath):
+        file_name = os.path.basename(filepath)
+        f_split = file_name.split("_")
+        day = datetime.datetime.strptime(f_split[1], "%Y%m%d").strftime("%Y年%m月%d日")
+        return f'【{self.live.room_info["room_owner"]}】<{self.live.room_info["room_name"]}> {day}直播回放'
+
+    def process_scheduled(self):
         while True:
-            end = time.time()
-            start = end - interval
-            start_time = datetime.datetime.fromtimestamp(start).strftime("%Y-%m-%d %H:%M:%S")
-            end_time = datetime.datetime.fromtimestamp(end).strftime("%Y-%m-%d %H:%M:%S")
-            print(start_time, end_time)
-            video_map = self.match_source_video(start_time, end_time)
-            print(video_map)
-            time.sleep(60)
+            split_command = self.live.split_command_queue.get()
+            filepath = split_command["filepath"]
+            is_complete = split_command["is_complete"] if "is_complete" in split_command else False
+            if filepath:
+                duration = get_video_real_duration(filepath)
+
+                if filepath not in self.split_progress_map:
+                    self.split_progress_map[filepath] = {"split_point": 0, "finished_videos": []}
+
+                print(split_command, duration, self.split_progress_map[filepath]["split_point"])
+
+                if is_complete:
+                    finished_video = self.process_file(filepath,
+                                                       self.split_progress_map[filepath]["split_point"],
+                                                       duration)
+                    self.split_progress_map[filepath]["split_point"] = duration
+                    self.split_progress_map[filepath]["finished_videos"].append(finished_video)
+
+                    self.live.upload_command_queue.put({
+                        "title": self.generate_file_title(filepath),
+                        "finished_videos": self.split_progress_map[filepath]["finished_videos"]})
+                else:
+                    if duration - self.split_progress_map[filepath]["split_point"] > self.split_interval:
+                        finished_video = self.process_file(filepath,
+                                                           self.split_progress_map[filepath]["split_point"],
+                                                           self.split_progress_map[filepath][
+                                                               "split_point"] + self.split_interval)
+
+                        self.split_progress_map[filepath]["finished_videos"].append(finished_video)
+                        self.split_progress_map[filepath]["split_point"] += self.split_interval
 
 
 class YClass(object):
-    pass
+    _config = {}
+
+    @property
+    def config(self):
+        import json
+        if not self._config:
+            with open("config.json", "r") as f:
+                self._config = json.load(f)
+
+        return self._config
 
 
 if __name__ == '__main__':
     lll = YClass()
-    setattr(lll, 'room_id', '73965')
-    processor = Processor(lll, None)
+    setattr(lll, 'room_id', '110')
+    processor = Processor(lll)
     # processor.process("2022-11-11 00:20:00", "2022-11-11 01:20:00", "生日快乐")
     # processor.process("2022-11-09 13:48:00", "2022-11-09 14:48:00", "摄像头和马桶")
     # cut_file = processor.cut("2022-11-07 23:10:00", "2022-11-08 01:30:00", "ldc")
     # print(cut_file)
-    processor.process_file("/Users/yujian/Code/py/AJRecorder/video_src/73965/73965_20221111_123152.flv")
+    processor.process_file("/Users/yujian/data/AJRecorder/video/source/110/110_20221116_120012.flv", 0, 1800)
+    while True:
+        time.sleep(10)

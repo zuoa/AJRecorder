@@ -22,6 +22,9 @@ class DouyuLive(BaseLive):
         super().__init__(room_id)
         self.logger = Logger(__name__).get_logger()
         self.tags = tags
+        self.split_cond = threading.Condition()
+        self.split_command_queue = Queue()
+        self.upload_command_queue = Queue()
 
     def _get_room_info(self):
         url = 'https://open.douyucdn.cn/api/RoomApi/room/%s' % self.room_id
@@ -42,7 +45,7 @@ class DouyuLive(BaseLive):
         return resp_json['data']['room_status'] == '1' and resp_json['data']['online'] != '0'
 
     def _create_thread_fn(self):
-        def _danmu_monitor(self, command_queue):
+        def _danmu_monitor(self):
             client = DouyuClient(self.room_id)
             db = sqlite3.connect("danmu.db")
             db_cursor = db.cursor()
@@ -87,44 +90,39 @@ class DouyuLive(BaseLive):
 
             client.start()
 
-        def _stream_recorder(self, command_queue):
-            recorder = FlvRecorder()
-            recorder.run(self, command_queue)
+        def _stream_recorder(self):
+            recorder = FlvRecorder(self)
+            recorder.run()
 
-        def _post_uploader(self, command_queue):
+        def _post_uploader(self):
             while True:
-                command = command_queue.get()
+                command = self.upload_command_queue.get()
                 if command:
-                    command_type = command["type"]
-                    if command_type == "full":
-                        self.uploader.upload(command["filepath"])
+                    self.uploader.upload(command["title"], command["finished_videos"])
 
-                time.sleep(5)
-
-        def _process_timer(self, command_queue):
+        def _process_timer(self):
             processor = Processor(self)
             processor.process_scheduled()
 
         return _danmu_monitor, _stream_recorder, _post_uploader, _process_timer
 
     def _run(self):
-        command_queue = Queue()
 
         danmu_monitor, stream_recorder, post_uploader, process_timer = self._create_thread_fn()
 
-        danmu_monitor_thread = threading.Thread(target=danmu_monitor, args=(self, command_queue,))
+        danmu_monitor_thread = threading.Thread(target=danmu_monitor, args=(self,))
         danmu_monitor_thread.setDaemon(True)
         danmu_monitor_thread.start()
 
-        stream_recorder_thread = threading.Thread(target=stream_recorder, args=(self, command_queue,))
+        stream_recorder_thread = threading.Thread(target=stream_recorder, args=(self,))
         stream_recorder_thread.setDaemon(True)
         stream_recorder_thread.start()
 
-        post_uploader_thread = threading.Thread(target=post_uploader, args=(self, command_queue,))
+        post_uploader_thread = threading.Thread(target=post_uploader, args=(self,))
         post_uploader_thread.setDaemon(True)
         post_uploader_thread.start()
 
-        process_timer_thread = threading.Thread(target=process_timer, args=(self, command_queue,))
+        process_timer_thread = threading.Thread(target=process_timer, args=(self,))
         process_timer_thread.setDaemon(True)
         process_timer_thread.start()
 
@@ -134,7 +132,4 @@ class DouyuLive(BaseLive):
         danmu_monitor_thread.join()
 
     def start(self):
-        process = Process(target=self._run)
-        process.start()
-
-        # process.join()
+        threading.Thread(target=self._run).start()

@@ -8,12 +8,14 @@ from logger import Logger
 
 
 class FlvRecorder:
-    def __init__(self):
+    def __init__(self, live):
         self.logger = Logger(__name__).get_logger()
+        self.live = live
 
     def record(self, record_url: str, output_filename: str) -> None:
         self.logger = Logger(__name__).get_logger()
         self.logger.info('Start recording...')
+        cache_size = 0
 
         try:
             config = {}
@@ -25,14 +27,20 @@ class FlvRecorder:
                     record_url)[0]
             }
             headers = {**default_headers, **config.get('root', {}).get('request_header', {})}
+
             resp = requests.get(record_url, stream=True,
                                 headers=headers,
-                                timeout=config.get('root', {}).get('check_interval', 60))
+                                timeout=60)
             with open(output_filename, "wb") as f:
                 for chunk in resp.iter_content(chunk_size=1024):
                     if chunk:
                         f.write(chunk)
                         f.flush()
+                        # print(len(chunk))
+                        cache_size += len(chunk)
+                        if cache_size > 10 * 1024 * 1024:
+                            cache_size = 0
+                            self.live.split_command_queue.put({"filepath": output_filename})
         except Exception as e:
             self.logger.error('Error while recording:' + str(e))
 
@@ -46,18 +54,19 @@ class FlvRecorder:
 
         return filepath
 
-    def run(self, live, command_queue):
+    def run(self):
         while True:
+            live = self.live
             if live.live_status:
                 live_url = live.live_url
                 if live_url:
-                    record_filepath = self.generate_filename(live)
-                    self.record(live_url, record_filepath)
+                    live.recording_file = self.generate_filename(live)
+                    self.record(live_url, live.recording_file)
                     time.sleep(5)
-                    if os.path.getsize(record_filepath) > 1024 * 1024:
-                        command_queue.put({'type': 'full', 'filepath': record_filepath})
+                    if os.path.getsize(live.recording_file) > 10 * 1024 * 1024:
+                        self.live.split_command_queue.put({"filepath": live.recording_file, "is_complete": True})
                     else:
-                        os.remove(record_filepath)
+                        os.remove(live.recording_file)
                     continue
 
             time.sleep(30)

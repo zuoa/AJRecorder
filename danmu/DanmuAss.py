@@ -9,7 +9,7 @@ DANMU_VIEWPORT_HEIGHT = 420
 DANMU_VIEWPORT_OFFSET_Y = 10
 DANMU_TIME = 12000
 FONT_FAMILY = "Hiragino Sans GB"
-FONT_SIZE = 32
+FONT_SIZE = 24
 DANMU_LINE_HEIGHT = FONT_SIZE + 2
 
 
@@ -84,6 +84,9 @@ class AssDanmu:
         self.content = content
         self.color = color
         self.video_start_time = datetime.datetime.strptime(video_start_time, "%Y-%m-%d %H:%M:%S").timestamp() * 1000
+        if "." in msg_time:
+            msg_time = msg_time[:msg_time.index(".")]
+
         self.start_time = datetime.datetime.strptime(msg_time,
                                                      "%Y-%m-%d %H:%M:%S").timestamp() * 1000 - self.video_start_time
 

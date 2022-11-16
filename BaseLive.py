@@ -13,6 +13,8 @@ logger = Logger(__name__).get_logger()
 class BaseLive(metaclass=abc.ABCMeta):
     _config = {}
     room_info = {}
+    recording_file = None
+
 
     def __init__(self, room_id):
         self.room_id = room_id
@@ -30,7 +32,6 @@ class BaseLive(metaclass=abc.ABCMeta):
             seconds=self.config.get('common', {}).get('check_interval', 60))
         self.refresh_room_info()
         self.uploader = Uploader(self)
-        self.uploader = Processor(self)
 
     @property
     def config(self):
