@@ -18,4 +18,5 @@ if __name__ == '__main__':
 
     for room_id, room_tags in room_map.items():
         process = Process(target=run, args=(room_id, room_tags,))
+        process.daemon = True
         process.start()
