@@ -1,13 +1,14 @@
 import os
 import datetime
 from biliup.plugins.bili_webup import BiliBili, Data
-from processor import Processor
+
+from logger import Logger
 
 
 class Uploader(object):
     def __init__(self, live, ):
         self.live = live
-        # self.processor = Processor(live)
+        self.logger = Logger(__name__).get_logger()
 
     def upload(self, title, video_files: [], tags=None):
         video = Data()
@@ -46,6 +47,7 @@ class Uploader(object):
                 file_size = os.path.getsize(file)
                 if file_size < 10 * 1024 * 1024:
                     continue
+                self.logger.info(f"uploading {file}")
                 video_part = bili.upload_file(file)  # 上传视频，默认线路AUTO自动选择，线程数量3。
                 video_part["title"] = f"{title}- P{index + 1}"
                 video.append(video_part)  # 添加已经上传的视频
@@ -124,5 +126,12 @@ class Uploader(object):
 if __name__ == '__main__':
     from DouyuLive import DouyuLive
 
-    Uploader(DouyuLive("73965")).upload("video_src/73965/73965_20221114_112900.flv",
-                                        title="【正宝TV】20221114 舞力全开 白日舞王", tags=["孙正"])
+    Uploader(DouyuLive("73965")).upload("【霸气虚幻哥1991】 2022年11月16日 直播回放 弹幕版 ",
+                                        [
+                                            "/Users/yujian/data/AJRecorder/video/output/73965/20221116224129_20221116231129.ass.mp4",
+                                            "/Users/yujian/data/AJRecorder/video/output/73965/20221116231129_20221116234129.ass.mp4",
+                                            "/Users/yujian/data/AJRecorder/video/output/73965/20221116234129_20221117001129.ass.mp4",
+                                            "/Users/yujian/data/AJRecorder/video/output/73965/20221117001129_20221117004129.ass.mp4",
+                                            "/Users/yujian/data/AJRecorder/video/output/73965/20221117004129_20221117004445.ass.mp4",
+                                        ],
+                                        tags=["孙正"])

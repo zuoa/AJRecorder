@@ -194,7 +194,7 @@ class Processor(object):
         file_name = os.path.basename(filepath)
         f_split = file_name.split("_")
         day = datetime.datetime.strptime(f_split[1], "%Y%m%d").strftime("%Y年%m月%d日")
-        return f'【{self.live.room_info["room_owner"]}】<{self.live.room_info["room_name"]}> {day}直播回放'
+        return f'【{self.live.room_info["room_owner"]}】 {day} 直播回放 弹幕版 <{self.live.room_info["room_name"]}>'
 
     def process_scheduled(self):
         while True:

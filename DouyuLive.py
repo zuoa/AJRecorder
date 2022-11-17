@@ -132,4 +132,6 @@ class DouyuLive(BaseLive):
         danmu_monitor_thread.join()
 
     def start(self):
-        threading.Thread(target=self._run).start()
+        main_thread = threading.Thread(target=self._run)
+        main_thread.start()
+        main_thread.join()
