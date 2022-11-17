@@ -9,7 +9,7 @@ DANMU_VIEWPORT_HEIGHT = 420
 DANMU_VIEWPORT_OFFSET_Y = 10
 DANMU_TIME = 12000
 FONT_FAMILY = "Source Han Sans CN"
-FONT_SIZE = 24
+FONT_SIZE = 20
 DANMU_LINE_HEIGHT = FONT_SIZE + 2
 
 
@@ -68,7 +68,7 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
                     break
                 i += 1
             else:
-                print(f"随机放入第{index + 1}条弹幕。{danmu.content}")
+                # print(f"随机放入第{index + 1}条弹幕。{danmu.content}")
                 rdm = random.randint(0, len(tracks) - 1)
                 tracks[rdm] = danmu
                 danmu.y = (rdm + 1) * DANMU_LINE_HEIGHT + DANMU_VIEWPORT_OFFSET_Y
