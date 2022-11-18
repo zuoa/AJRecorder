@@ -40,7 +40,7 @@ class FlvRecorder:
                         # print(len(chunk))
 
                         ts = time.time()
-                        if ts - self.last_notify_ts > 60 * 15:
+                        if ts - self.last_notify_ts > 60 * 16:
                             self.live.split_command_queue.put({"filepath": output_filename})
                             self.last_notify_ts = ts
         except Exception as e:
