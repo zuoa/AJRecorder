@@ -11,11 +11,12 @@ class FlvRecorder:
     def __init__(self, live):
         self.logger = Logger(__name__).get_logger()
         self.live = live
+        self.last_notify_ts = time.time()
 
     def record(self, record_url: str, output_filename: str) -> None:
         self.logger = Logger(__name__).get_logger()
         self.logger.info('Start recording...')
-        cache_size = 0
+        self.last_notify_ts = time.time()
 
         try:
             config = {}
@@ -37,10 +38,11 @@ class FlvRecorder:
                         f.write(chunk)
                         f.flush()
                         # print(len(chunk))
-                        cache_size += len(chunk)
-                        if cache_size > 10 * 1024 * 1024:
-                            cache_size = 0
+
+                        ts = time.time()
+                        if ts - self.last_notify_ts > 60 * 15:
                             self.live.split_command_queue.put({"filepath": output_filename})
+                            self.last_notify_ts = ts
         except Exception as e:
             self.logger.error('Error while recording:' + str(e))
 
