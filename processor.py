@@ -184,7 +184,7 @@ class Processor(object):
         ass_filepath = self.generate_ass(start_time_str, end_time_str, "A")
         output_file = f'{self.video_output_dir}/{self.live.room_id}/{start_time.strftime("%Y%m%d%H%M%S")}_{end_time.strftime("%Y%m%d%H%M%S")}.ass.mp4'
 
-        command = f"{self.ffmpeg} -y  -ss {start_offset}  -t {end_offset - start_offset} -accurate_seek -i {filepath}  -vf ass={ass_filepath} -threads 4  -preset fast -s 1920x1080 -c:v libx264 -c:a aac  -crf 28 -r 30  -b:v 2M   -avoid_negative_ts 1 {output_file}"
+        command = f"{self.ffmpeg} -y  -ss {start_offset}  -t {end_offset - start_offset} -accurate_seek -i {filepath}  -vf ass={ass_filepath}   -preset fast -s 1920x1080 -c:v libx264 -c:a aac  -crf 28 -r 30  -b:v 2M -loglevel quiet  -avoid_negative_ts 1 {output_file}"
 
         # threading.Thread(target=ffmpeg_command, args=(command,)).start()
         ffmpeg_command(command)
