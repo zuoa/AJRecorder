@@ -63,9 +63,13 @@ class DouyuLive(BaseLive):
                 self.__live_status = message["original_msg"]["ss"] == '1'
                 if self.__live_status:
                     self.refresh_room_info()
-                    requests.post(f'https://sctapi.ftqq.com/{self.config["push_key"]}.send',
-                                  {"title": "斗鱼直播间开播通知",
-                                   "desc": f"房间号：{self.room_id}，房间名：{self.room_info['room_name']}，主播：{self.room_info['room_owner']}，分类：{self.room_info['cate_name']}"})
+
+                    push_key = self.config.get('common', {}).get('push_key', '')
+                    if push_key:
+                        resp_text_push = requests.post(f'https://sctapi.ftqq.com/{push_key}.send',
+                                                       {"title": "斗鱼直播间开播通知",
+                                                        "desc": f"房间号：{self.room_id}，房间名：{self.room_info['room_name']}，主播：{self.room_info['room_owner']}，分类：{self.room_info['cate_name']}"}).text
+                        self.logger.info(resp_text_push)
 
             @client.danmu
             def danmu(message):
