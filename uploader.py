@@ -24,7 +24,7 @@ class Uploader(object):
                          self.live.room_info["room_owner"],
                          self.live.room_id]
 
-        generate_tags.extend(room_config.get('bili_tid', []))
+        generate_tags.extend(room_config.get('tags', []))
 
         if tags:
             generate_tags.extend(tags)
@@ -34,14 +34,7 @@ class Uploader(object):
 
         video.set_tag(generate_tags)
         with BiliBili(video) as bili:
-            bili.login("cookies.json", {
-                'cookies': {
-                    'SESSDATA': self.live.config.get('uploader', {}).get('SESSDATA', ''),
-                    'bili_jct': self.live.config.get('uploader', {}).get('bili_jct', ''),
-                    'DedeUserID__ckMd5': self.live.config.get('uploader', {}).get('DedeUserID__ckMd5', ''),
-                    'DedeUserID': self.live.config.get('uploader', {}).get('DedeUserID', ''),
-                    'access_token': self.live.config.get('uploader', {}).get('access_token', '')
-                }, 'access_token': self.live.config.get('uploader', {}).get('access_token', '')})
+            bili.login("bili_cookies.json", {})
             # bili.login_by_password("username", "password")
             for index, file in enumerate(video_files):
                 file_size = os.path.getsize(file)
@@ -99,7 +92,7 @@ class Uploader(object):
 
         video.set_tag(generate_tags)
         with BiliBili(video) as bili:
-            bili.login("cookies.json", {
+            bili.login("bili_cookies.json", {
                 'cookies': {
                     'SESSDATA': self.live.config.get('uploader', {}).get('SESSDATA', ''),
                     'bili_jct': self.live.config.get('uploader', {}).get('bili_jct', ''),
@@ -126,12 +119,23 @@ class Uploader(object):
 if __name__ == '__main__':
     from DouyuLive import DouyuLive
 
-    Uploader(DouyuLive("73965")).upload("【霸气虚幻哥1991】 2022年11月16日 直播回放 弹幕版 ",
-                                        [
-                                            "/Users/yujian/data/AJRecorder/video/output/73965/20221116224129_20221116231129.ass.mp4",
-                                            "/Users/yujian/data/AJRecorder/video/output/73965/20221116231129_20221116234129.ass.mp4",
-                                            "/Users/yujian/data/AJRecorder/video/output/73965/20221116234129_20221117001129.ass.mp4",
-                                            "/Users/yujian/data/AJRecorder/video/output/73965/20221117001129_20221117004129.ass.mp4",
-                                            "/Users/yujian/data/AJRecorder/video/output/73965/20221117004129_20221117004445.ass.mp4",
-                                        ],
-                                        tags=["孙正"])
+    room_config = {
+        "platform": "douyu",
+        "room_id": "73965",
+        "room_owner_alias": "孙正",
+        "tags": [
+            "孙正"
+        ],
+        "bili_tid": 171,
+        "overlay_danmaku": True,
+        "active": True
+    }
+    Uploader(DouyuLive(room_config)).upload("【霸气虚幻哥1991】 2022年11月16日 直播回放 弹幕版 ",
+                                            [
+                                                "/Users/yujian/data/AJRecorder/video/output/73965/20221116224129_20221116231129.ass.mp4",
+                                                "/Users/yujian/data/AJRecorder/video/output/73965/20221116231129_20221116234129.ass.mp4",
+                                                "/Users/yujian/data/AJRecorder/video/output/73965/20221116234129_20221117001129.ass.mp4",
+                                                "/Users/yujian/data/AJRecorder/video/output/73965/20221117001129_20221117004129.ass.mp4",
+                                                "/Users/yujian/data/AJRecorder/video/output/73965/20221117004129_20221117004445.ass.mp4",
+                                            ],
+                                            tags=["孙正"])
