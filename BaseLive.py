@@ -15,10 +15,8 @@ class BaseLive(metaclass=abc.ABCMeta):
     room_info = {}
     recording_file = None
 
-
     def __init__(self, room_id):
         self.room_id = room_id
-
         self.session = requests.session()
         self.session.mount('https://', HTTPAdapter(max_retries=3))
         headers = self.config.get('common', {}).get('request_header', {})
@@ -71,3 +69,10 @@ class BaseLive(metaclass=abc.ABCMeta):
         else:
             logger.info("间隔不足，使用过去状态")
         return self.__live_url
+
+    def push_message(self, title, content):
+        push_key = self.config.get('common', {}).get('push_key', '')
+        if push_key:
+            resp_text_push = requests.post(f'https://sctapi.ftqq.com/{push_key}.send',
+                                           {"title": title, "desp": content}).text
+            logger.info(resp_text_push)
