@@ -1,4 +1,6 @@
 import threading
+import os
+import datetime
 import sqlite3
 from queue import Queue
 from logger import Logger
@@ -127,3 +129,18 @@ class DouyuLive(BaseLive):
         main_thread = threading.Thread(target=self._run)
         main_thread.start()
         main_thread.join()
+
+    def upload_file(self, title, filepath, start_time_str, end_time_str):
+        processor = Processor(self)
+
+        file = os.path.basename(filepath)
+        f_split = file.split("_")
+        file_start_time_str = (f_split[1] + f_split[2]).replace(".flv", "")
+        file_start_time = datetime.datetime.strptime(file_start_time_str, "%Y%m%d%H%M%S")
+        start_time = datetime.datetime.strptime(start_time_str, "%Y-%m-%d %H:%M:%S")
+        end_time = datetime.datetime.strptime(end_time_str, "%Y-%m-%d %H:%M:%S")
+
+        start_offset = (start_time - file_start_time).seconds
+        end_offset = (end_time - file_start_time).seconds
+        output_file = processor.process_file(filepath, start_offset, end_offset)
+        self.uploader.upload(title, [output_file], ["煊正"])
