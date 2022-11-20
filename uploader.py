@@ -1,7 +1,8 @@
+import json
 import os
 import datetime
 from biliup.plugins.bili_webup import BiliBili, Data
-
+from utils import generate_part_title
 from logger import Logger
 
 
@@ -92,18 +93,11 @@ class Uploader(object):
 
         video.set_tag(generate_tags)
         with BiliBili(video) as bili:
-            bili.login("bili_cookies.json", {
-                'cookies': {
-                    'SESSDATA': self.live.config.get('uploader', {}).get('SESSDATA', ''),
-                    'bili_jct': self.live.config.get('uploader', {}).get('bili_jct', ''),
-                    'DedeUserID__ckMd5': self.live.config.get('uploader', {}).get('DedeUserID__ckMd5', ''),
-                    'DedeUserID': self.live.config.get('uploader', {}).get('DedeUserID', ''),
-                    'access_token': self.live.config.get('uploader', {}).get('access_token', '')
-                }, 'access_token': self.live.config.get('uploader', {}).get('access_token', '')})
+            bili.login("bili_cookies.json", {})
             # bili.login_by_password("username", "password")
             for index, file in enumerate(file_list):
                 video_part = bili.upload_file(file)  # 上传视频，默认线路AUTO自动选择，线程数量3。
-                video_part["title"] = f"{title}- P{index + 1}"
+                video_part["title"] = generate_part_title(os.path.basename(file))
                 video.append(video_part)  # 添加已经上传的视频
 
             print(video)
@@ -111,6 +105,7 @@ class Uploader(object):
             # video.cover = bili.cover_up('/Users/yujian/Downloads/20221109193824.jpg')
             ret = bili.submit()  # 提交视频
             print(ret)
+            self.live.push_message(f"上传完成:{title}", json.dumps(ret))
             # if ret["code"] == 0:
             #     for file in file_list:
             #         os.remove(file)

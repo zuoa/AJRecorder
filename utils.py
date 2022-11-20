@@ -1,4 +1,4 @@
-import os
+import datetime
 from moviepy.editor import VideoFileClip
 import traceback
 from PIL import ImageFont
@@ -36,6 +36,14 @@ def get_font_size(font_size, font_path, text):
     """
     font = ImageFont.truetype(font_path, font_size)
     return font.getsize(text)
+
+
+def generate_part_title(filename):
+    t = filename.split(".")[0]
+    start = t.split("_")[0]
+    start_time = datetime.datetime.strptime(start, "%Y%m%d%H%M%S")
+    return start_time.strftime("%m月%d日 %H时%M分")
+
 
 if __name__ == '__main__':
     y = get_video_real_duration("/Users/yujian/data/AJRecorder/video/source/7828414/7828414_20221115_162622.flv")
