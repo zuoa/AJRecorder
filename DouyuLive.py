@@ -1,12 +1,6 @@
-import time
-import re
 import threading
 import sqlite3
-from multiprocessing import Process
 from queue import Queue
-
-import requests
-
 from logger import Logger
 
 from BaseLive import BaseLive
@@ -18,10 +12,9 @@ from danmu.douyu import DouyuClient
 
 class DouyuLive(BaseLive):
 
-    def __init__(self, room_id, tags=None):
-        super().__init__(room_id)
+    def __init__(self, room_config):
+        super().__init__(room_config)
         self.logger = Logger(__name__).get_logger()
-        self.tags = tags
         self.split_cond = threading.Condition()
         self.split_command_queue = Queue()
         self.upload_command_queue = Queue()

@@ -15,8 +15,9 @@ class BaseLive(metaclass=abc.ABCMeta):
     room_info = {}
     recording_file = None
 
-    def __init__(self, room_id):
-        self.room_id = room_id
+    def __init__(self, room_config):
+        self.room_config = room_config
+        self.room_id = room_config["room_id"]
         self.session = requests.session()
         self.session.mount('https://', HTTPAdapter(max_retries=3))
         headers = self.config.get('common', {}).get('request_header', {})

@@ -11,20 +11,20 @@ class Uploader(object):
         self.logger = Logger(__name__).get_logger()
 
     def upload(self, title, video_files: [], tags=None):
+        room_config = self.live.room_config
         video = Data()
         video.title = title
         print(video.title)
         video.desc = self.live.room_id
         # video.source = 'douyu'
         video.copyright = 1
-        video.tid = 171
+        video.tid = room_config.get('bili_tid', 171)
         generate_tags = ['直播录像',
                          self.live.room_info["cate_name"],
                          self.live.room_info["room_owner"],
                          self.live.room_id]
 
-        if self.live.tags:
-            generate_tags.extend(self.live.tags)
+        generate_tags.extend(room_config.get('bili_tid', []))
 
         if tags:
             generate_tags.extend(tags)

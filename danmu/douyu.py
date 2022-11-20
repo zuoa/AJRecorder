@@ -209,7 +209,7 @@ class DouyuClient(DouyuCore):
     def __init__(self, room_id):
         # global __table_name
         super(DouyuClient, self).__init__(room_id)
-        print(room_id)
+        # print(room_id)
 
     def __register(self, fn, msg_type):
         if fn is None:

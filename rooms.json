@@ -1,0 +1,35 @@
+[
+  {
+    "platform": "douyu",
+    "room_id": "73965",
+    "room_owner_alias": "孙正",
+    "tags": [
+      "孙正"
+    ],
+    "bili_tid": 171,
+    "overlay_danmaku": true,
+    "active": true
+  },
+  {
+    "platform": "douyu",
+    "room_id": "7828414",
+    "room_owner_alias": "煊宝",
+    "tags": [
+      "煊宝"
+    ],
+    "bili_tid": 171,
+    "overlay_danmaku": true,
+    "active": true
+  },
+  {
+    "platform": "douyu",
+    "room_id": "7930707",
+    "room_owner_alias": "朴雨彬",
+    "tags": [
+      "朴雨彬"
+    ],
+    "bili_tid": 154,
+    "overlay_danmaku": true,
+    "active": true
+  }
+]
