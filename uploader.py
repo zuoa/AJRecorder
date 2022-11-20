@@ -12,10 +12,10 @@ class Uploader(object):
         self.logger = Logger(__name__).get_logger()
 
     def upload(self, title, video_files: [], tags=None):
+        self.logger.info(f"try to submit: {title}")
         room_config = self.live.room_config
         video = Data()
         video.title = title
-        print(video.title)
         video.desc = self.live.room_id
         # video.source = 'douyu'
         video.copyright = 1
@@ -37,78 +37,80 @@ class Uploader(object):
         with BiliBili(video) as bili:
             bili.login("bili_cookies.json", {})
             # bili.login_by_password("username", "password")
-            for index, file in enumerate(video_files):
+            for file in video_files:
                 file_size = os.path.getsize(file)
                 if file_size < 10 * 1024 * 1024:
                     continue
                 self.logger.info(f"uploading {file}")
                 video_part = bili.upload_file(file)  # 上传视频，默认线路AUTO自动选择，线程数量3。
-                video_part["title"] = f"{title}- P{index + 1}"
+                video_part["title"] = generate_part_title(os.path.basename(file))
                 video.append(video_part)  # 添加已经上传的视频
 
-            print(video)
+            self.logger.debug(video)
             if len(video.videos) == 0:
                 return
 
             # video.dtime = dtime  # 设置延后发布（2小时~15天）
             # video.cover = bili.cover_up('/Users/yujian/Downloads/20221109193824.jpg')
             ret = bili.submit()  # 提交视频
-            print(ret)
 
-    def upload_file(self, filepath: str, title=None, tags=None):
-        if not title:
-            file_name = os.path.basename(filepath)
-            f_split = file_name.split("_")
-            day = datetime.datetime.strptime(f_split[1], "%Y%m%d").strftime("%Y年%m月%d日")
-            title = f'【{self.live.room_info["room_owner"]}】<{self.live.room_info["room_name"]}> {day}直播回放'
-
-        file_list = [filepath]
-        file_size = os.path.getsize(filepath)
-        if file_size < 10 * 1024 * 1024:
-            return
-
-        if file_size >= 3 * 1024 * 1024 * 1024:
-            file_list = self.processor.cut_file(filepath)
-
-        video = Data()
-        video.title = title
-        print(video.title)
-        video.desc = self.live.room_id
-        # video.source = 'douyu'
-        video.copyright = 1
-        video.tid = 171
-        generate_tags = ['直播录像',
-                         self.live.room_info["cate_name"],
-                         self.live.room_info["room_owner"],
-                         self.live.room_id]
-
-        if self.live.tags:
-            generate_tags.extend(self.live.tags)
-
-        if tags:
-            generate_tags.extend(tags)
-
-        if len(generate_tags) > 10:
-            generate_tags = generate_tags[:10]
-
-        video.set_tag(generate_tags)
-        with BiliBili(video) as bili:
-            bili.login("bili_cookies.json", {})
-            # bili.login_by_password("username", "password")
-            for index, file in enumerate(file_list):
-                video_part = bili.upload_file(file)  # 上传视频，默认线路AUTO自动选择，线程数量3。
-                video_part["title"] = generate_part_title(os.path.basename(file))
-                video.append(video_part)  # 添加已经上传的视频
-
-            print(video)
-            # video.dtime = dtime  # 设置延后发布（2小时~15天）
-            # video.cover = bili.cover_up('/Users/yujian/Downloads/20221109193824.jpg')
-            ret = bili.submit()  # 提交视频
-            print(ret)
             self.live.push_message(f"上传完成:{title}", json.dumps(ret))
-            # if ret["code"] == 0:
-            #     for file in file_list:
-            #         os.remove(file)
+            self.logger.info(ret)
+
+    # def upload_file(self, filepath: str, title=None, tags=None):
+    #     if not title:
+    #         file_name = os.path.basename(filepath)
+    #         f_split = file_name.split("_")
+    #         day = datetime.datetime.strptime(f_split[1], "%Y%m%d").strftime("%Y年%m月%d日")
+    #         title = f'【{self.live.room_info["room_owner"]}】<{self.live.room_info["room_name"]}> {day}直播回放'
+    #
+    #     file_list = [filepath]
+    #     file_size = os.path.getsize(filepath)
+    #     if file_size < 10 * 1024 * 1024:
+    #         return
+    #
+    #     if file_size >= 3 * 1024 * 1024 * 1024:
+    #         file_list = self.processor.cut_file(filepath)
+    #
+    #     video = Data()
+    #     video.title = title
+    #     print(video.title)
+    #     video.desc = self.live.room_id
+    #     # video.source = 'douyu'
+    #     video.copyright = 1
+    #     video.tid = 171
+    #     generate_tags = ['直播录像',
+    #                      self.live.room_info["cate_name"],
+    #                      self.live.room_info["room_owner"],
+    #                      self.live.room_id]
+    #
+    #     if self.live.tags:
+    #         generate_tags.extend(self.live.tags)
+    #
+    #     if tags:
+    #         generate_tags.extend(tags)
+    #
+    #     if len(generate_tags) > 10:
+    #         generate_tags = generate_tags[:10]
+    #
+    #     video.set_tag(generate_tags)
+    #     with BiliBili(video) as bili:
+    #         bili.login("bili_cookies.json", {})
+    #         # bili.login_by_password("username", "password")
+    #         for index, file in enumerate(file_list):
+    #             video_part = bili.upload_file(file)  # 上传视频，默认线路AUTO自动选择，线程数量3。
+    #             video_part["title"] = generate_part_title(os.path.basename(file))
+    #             video.append(video_part)  # 添加已经上传的视频
+    #
+    #         print(video)
+    #         # video.dtime = dtime  # 设置延后发布（2小时~15天）
+    #         # video.cover = bili.cover_up('/Users/yujian/Downloads/20221109193824.jpg')
+    #         ret = bili.submit()  # 提交视频
+    #         print(ret)
+    #         self.live.push_message(f"上传完成:{title}", json.dumps(ret))
+    # if ret["code"] == 0:
+    #     for file in file_list:
+    #         os.remove(file)
 
 
 if __name__ == '__main__':
