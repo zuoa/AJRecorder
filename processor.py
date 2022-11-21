@@ -189,6 +189,10 @@ class Processor(object):
 
         # threading.Thread(target=ffmpeg_command, args=(command,)).start()
         ffmpeg_command(command)
+
+        if os.path.exists(output_file):
+            os.remove(ass_filepath)
+
         return output_file
 
     def generate_file_title(self, filepath):
