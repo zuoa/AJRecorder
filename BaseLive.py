@@ -23,8 +23,7 @@ class BaseLive(metaclass=abc.ABCMeta):
         headers = self.config.get('common', {}).get('request_header', {})
         self.session.headers.update(headers)
 
-        self.__last_check_time = datetime.datetime.now() + datetime.timedelta(
-            seconds=-self.config.get('common', {}).get('check_interval', 60))
+        self.__last_check_time = datetime.datetime.now()
         self.__live_status = False
         self.__live_url = ''
         self.__allowed_check_interval = datetime.timedelta(
@@ -60,15 +59,14 @@ class BaseLive(metaclass=abc.ABCMeta):
     def live_status(self) -> bool:
         if datetime.datetime.now() - self.__last_check_time >= self.__allowed_check_interval:
             self.__live_status = self._get_live_status()
+            self.__last_check_time = datetime.datetime.now()
         return self.__live_status
 
     @property
     def live_url(self) -> str:
         if datetime.datetime.now() - self.__last_check_time >= self.__allowed_check_interval:
-            logger.info("允许检查")
             self.__live_url = self._get_live_url()
-        else:
-            logger.info("间隔不足，使用过去状态")
+            self.__last_check_time = datetime.datetime.now()
         return self.__live_url
 
     def push_message(self, title, content):

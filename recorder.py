@@ -69,6 +69,7 @@ class FlvRecorder:
                         self.live.split_command_queue.put({"filepath": live.recording_file, "is_complete": True})
                     else:
                         os.remove(live.recording_file)
+
                     continue
 
             time.sleep(30)

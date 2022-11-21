@@ -41,9 +41,10 @@ def ffmpeg_command(command):
         print(command)
         ret = subprocess.run(command, shell=True, check=True)
         return ret
-    except subprocess.CalledProcessError as err:
+    except subprocess.CalledProcessError as e:
         traceback.print_exc()
-        return err
+        print("command '{}' return with error (code {}): {}".format(e.cmd, e.returncode, e.output))
+        return e
 
 
 class Processor(object):
