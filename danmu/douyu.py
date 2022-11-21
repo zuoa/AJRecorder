@@ -44,7 +44,8 @@ class DanmuWSClient:
             self._on_message(msg_decompressed)
 
     def __on_error(self, ws, error):
-        print("error:", error)
+        # print("error:", error)
+        pass
 
     def __msg_encode(self, msg):
         # 头部8字节，尾部1字节，与字符串长度相加即数据长度
