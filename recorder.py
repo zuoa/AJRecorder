@@ -15,7 +15,7 @@ class FlvRecorder:
 
     def record(self, record_url: str, output_filename: str) -> None:
         self.logger = Logger(__name__).get_logger()
-        self.logger.info('Start recording...')
+        self.logger.info(self.live.generate_log('Start recording...'))
         self.last_notify_ts = time.time()
 
         try:
@@ -44,9 +44,9 @@ class FlvRecorder:
                             self.live.split_command_queue.put({"filepath": output_filename})
                             self.last_notify_ts = ts
         except Exception as e:
-            self.logger.error('Error while recording:' + str(e))
+            self.logger.error(self.live.generate_log('Error while recording:' + str(e)))
 
-        self.logger.info('Stop recording...')
+        self.logger.info(self.live.generate_log('Stop recording...'))
 
     def generate_filename(self, live) -> str:
         video_source_dir = live.config.get('common', {}).get('video_source_dir', 'video_src')

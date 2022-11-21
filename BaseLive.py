@@ -23,7 +23,8 @@ class BaseLive(metaclass=abc.ABCMeta):
         headers = self.config.get('common', {}).get('request_header', {})
         self.session.headers.update(headers)
 
-        self.__last_check_time = datetime.datetime.now()
+        self.__last_check_status_time = datetime.datetime.now() - datetime.timedelta(seconds=86400)
+        self.__last_check_url_time = datetime.datetime.now() - datetime.timedelta(seconds=86400)
         self.__live_status = False
         self.__live_url = ''
         self.__allowed_check_interval = datetime.timedelta(
@@ -41,7 +42,7 @@ class BaseLive(metaclass=abc.ABCMeta):
 
     def refresh_room_info(self):
         self.room_info = self._get_room_info()
-        logger.debug(f"Room info: {self.room_info}")
+        logger.debug(self.generate_log(f"Room info: {self.room_info}"))
 
     @abc.abstractmethod
     def _get_room_info(self):
@@ -57,16 +58,16 @@ class BaseLive(metaclass=abc.ABCMeta):
 
     @property
     def live_status(self) -> bool:
-        if datetime.datetime.now() - self.__last_check_time >= self.__allowed_check_interval:
+        if datetime.datetime.now() - self.__last_check_status_time >= self.__allowed_check_interval:
             self.__live_status = self._get_live_status()
-            self.__last_check_time = datetime.datetime.now()
+            self.__last_check_status_time = datetime.datetime.now()
         return self.__live_status
 
     @property
     def live_url(self) -> str:
-        if datetime.datetime.now() - self.__last_check_time >= self.__allowed_check_interval:
+        if datetime.datetime.now() - self.__last_check_url_time >= self.__allowed_check_interval:
             self.__live_url = self._get_live_url()
-            self.__last_check_time = datetime.datetime.now()
+            self.__last_check_url_time = datetime.datetime.now()
         return self.__live_url
 
     def push_message(self, title, content):
@@ -75,3 +76,6 @@ class BaseLive(metaclass=abc.ABCMeta):
             resp_text_push = requests.post(f'https://sctapi.ftqq.com/{push_key}.send',
                                            {"title": title, "desp": content}).text
             logger.info(resp_text_push)
+
+    def generate_log(self, content):
+        return f"{self.room_info.get('room_owner', '')}({self.room_id}):{content}"
