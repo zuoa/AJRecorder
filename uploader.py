@@ -1,6 +1,8 @@
 import json
 import os
 import datetime
+import time
+
 from biliup.plugins.bili_webup import BiliBili, Data
 
 from BiliVideoChecker import BiliVideoChecker
@@ -54,14 +56,22 @@ class Uploader(object):
 
             # video.dtime = dtime  # 设置延后发布（2小时~15天）
             # video.cover = bili.cover_up('/Users/yujian/Downloads/20221109193824.jpg')
-            ret = bili.submit()  # 提交视频
-            self.logger.info(ret)
-            if ret.get('code', '-1') == 0 and ret.get('data', {}).get('bvid', None) is not None:
-                self.live.push_message(f"上传成功:{title}", json.dumps(ret))
-                checker = BiliVideoChecker(ret.get('data', {}).get('bvid', None), video_files)
-                checker.start()
-            else:
-                self.live.push_message(f"上传失败:{title}", json.dumps(ret))
+            submit_times = 0
+            while submit_times < 3:
+                try:
+                    ret = bili.submit()  # 提交视频
+                    self.logger.info(ret)
+                    self.live.push_message(f"上传成功:{title}", json.dumps(ret))
+                    if ret.get('data', {}).get('bvid', None) is not None:
+                        checker = BiliVideoChecker(ret.get('data', {}).get('bvid', None), video_files)
+                        checker.start()
+                        break
+                except Exception as e:
+                    if e["code"] == 21070:
+                        submit_times += 1
+                        time.sleep(30)
+                    else:
+                        break
 
 
 if __name__ == '__main__':
