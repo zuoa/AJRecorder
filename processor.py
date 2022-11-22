@@ -2,7 +2,6 @@ import os
 import datetime
 import subprocess
 import re
-import threading
 import time
 import traceback
 
@@ -135,6 +134,36 @@ class Processor(object):
 
         return ass_file
 
+    def generate_cover(self, filepath):
+        file = os.path.basename(filepath)
+        f_split = file.split("_")
+        file_start_time_str = (f_split[1] + f_split[2]).replace(".flv", "")
+        file_start_time = datetime.datetime.strptime(file_start_time_str, "%Y%m%d%H%M%S")
+
+        duration = get_video_real_duration(filepath)
+
+        start_time = file_start_time
+        end_time = start_time + datetime.timedelta(seconds=duration)
+
+        simple_start_time = start_time.strftime("%Y%m%d%H%M%S")
+        simple_end_time = end_time.strftime("%Y%m%d%H%M%S")
+
+        cover_file = None
+        db = DanmuDB(self.live.room_id)
+        danmu_top_list = db.get_top_minute(start_time, end_time)
+        if danmu_top_list:
+            print(danmu_top_list[:3])
+            minute = danmu_top_list[0]["minute"]
+            minute_time = datetime.datetime.strptime(minute, "%Y-%m-%d %H:%M:%S")
+            simple_minute = minute_time.strftime("%Y%m%d%H%M%S")
+            cover_file = f"{self.video_output_dir}/{self.live.room_id}/COVER_{simple_start_time}_{simple_end_time}_{simple_minute}.jpg"
+
+            start_offset = (minute_time - file_start_time).seconds
+            command = f"{self.ffmpeg} -ss {start_offset}  -i {filepath}  -r 1 -vframes 1 -an  -vcodec mjpeg -loglevel quiet  {cover_file}"
+            os.system(command)
+            print(cover_file)
+        return cover_file
+
     def process(self, start_time, end_time, tag):
         video_filepath = self.cut(start_time, end_time, tag)
         if not video_filepath:
@@ -235,27 +264,25 @@ class Processor(object):
                         self.split_progress_map[filepath]["split_point"] += self.split_interval
 
 
-class YClass(object):
-    _config = {}
-
-    @property
-    def config(self):
-        import json
-        if not self._config:
-            with open("config.json", "r") as f:
-                self._config = json.load(f)
-
-        return self._config
-
-
 if __name__ == '__main__':
-    lll = YClass()
-    setattr(lll, 'room_id', '110')
-    processor = Processor(lll)
+    room_config = {
+        "platform": "douyu",
+        "room_id": "7828414",
+        "room_owner_alias": "煊宝",
+        "tags": [
+            "煊宝"
+        ],
+        "bili_tid": 171,
+        "overlay_danmaku": True,
+        "active": True
+    }
+
+    from DouyuLive import DouyuLive
+
+    processor = Processor(DouyuLive(room_config))
+    processor.generate_cover("/Users/yujian/data/AJRecorder/video/source/7828414/7828414_20221120_152220.flv")
     # processor.process("2022-11-11 00:20:00", "2022-11-11 01:20:00", "生日快乐")
     # processor.process("2022-11-09 13:48:00", "2022-11-09 14:48:00", "摄像头和马桶")
     # cut_file = processor.cut("2022-11-07 23:10:00", "2022-11-08 01:30:00", "ldc")
     # print(cut_file)
-    processor.process_file("/Users/yujian/data/AJRecorder/video/source/110/110_20221116_120012.flv", 0, 1800)
-    while True:
-        time.sleep(10)
+    # processor.process_file("/Users/yujian/data/AJRecorder/video/source/110/110_20221116_120012.flv", 0, 1800)
