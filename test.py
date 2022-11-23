@@ -3,17 +3,17 @@ from DouyuLive import DouyuLive
 if __name__ == '__main__':
     live = DouyuLive({
         "platform": "douyu",
-        "room_id": "7828414",
-        "room_owner_alias": "煊宝",
+        "room_id": "73965",
+        "room_owner_alias": "孙正",
         "tags": [
-            "煊宝"
+            "孙正"
         ],
         "bili_tid": 171,
         "overlay_danmaku": True,
         "active": True
     })
 
-    live.upload_file("【煊宝】《量身定做》《一模一样》 你想成为正夫人吗？",
-                     "/Users/yujian/data/AJRecorder/video/source/7828414/7828414_20221120_152220.flv",
-                     "2022-11-20 18:30:00",
-                     "2022-11-20 19:20:00")
+    live.upload_file("【小正学CP】《梦里见》《每天为你唱歌》《小幸运》学的怎么都是自己曾经的样子",
+                     "/Users/yujian/data/AJRecorder/video/source/73965/73965_20221122_204546.flv",
+                     "2022-11-22 21:55:00",
+                     "2022-11-20 23:00:00")

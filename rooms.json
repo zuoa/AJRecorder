@@ -19,7 +19,7 @@
     ],
     "bili_tid": 171,
     "overlay_danmaku": true,
-    "active": true
+    "active": false
   },
   {
     "platform": "douyu",
