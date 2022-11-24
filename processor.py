@@ -250,9 +250,11 @@ class Processor(object):
                     self.split_progress_map[filepath]["split_point"] = duration
                     self.split_progress_map[filepath]["finished_videos"].append(finished_video)
 
+                    cover = self.generate_cover(filepath)
                     self.live.upload_command_queue.put({
                         "title": self.generate_file_title(filepath),
-                        "finished_videos": self.split_progress_map[filepath]["finished_videos"]})
+                        "finished_videos": self.split_progress_map[filepath]["finished_videos"],
+                        "cover": cover})
                 else:
                     if duration - self.split_progress_map[filepath]["split_point"] > self.split_interval:
                         finished_video = self.process_file(filepath,

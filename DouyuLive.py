@@ -92,7 +92,7 @@ class DouyuLive(BaseLive):
             while True:
                 command = self.upload_command_queue.get()
                 if command:
-                    self.uploader.upload(command["title"], command["finished_videos"])
+                    self.uploader.upload(command["title"], command["finished_videos"], cover=command["cover"])
 
         def _process_timer(self):
             processor = Processor(self)
@@ -143,4 +143,4 @@ class DouyuLive(BaseLive):
         start_offset = (start_time - file_start_time).seconds
         end_offset = (end_time - file_start_time).seconds
         output_file = processor.process_file(filepath, start_offset, end_offset)
-        self.uploader.upload(title, [output_file], ["煊正"])
+        self.uploader.upload(title, [output_file], tags=["煊正"])

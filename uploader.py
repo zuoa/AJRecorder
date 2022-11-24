@@ -15,7 +15,7 @@ class Uploader(object):
         self.live = live
         self.logger = Logger(__name__).get_logger()
 
-    def upload(self, title, video_files: [], tags=None):
+    def upload(self, title, video_files: [], tags=None, cover=None, ):
         self.logger.info(f"try to submit: {title}")
         room_config = self.live.room_config
         video = Data()
@@ -55,7 +55,8 @@ class Uploader(object):
                 return
 
             # video.dtime = dtime  # 设置延后发布（2小时~15天）
-            # video.cover = bili.cover_up('/Users/yujian/Downloads/20221109193824.jpg')
+            if cover:
+                video.cover = bili.cover_up(cover)
             submit_times = 0
             while submit_times < 3:
                 try:
