@@ -62,7 +62,9 @@ class FlvParser(object):
             if tag_type == 9 and tag_data[1] == 1:
                 if first_ts < 0:
                     first_ts = tag_ts
-                if tag_ts >= first_ts:
+                    last_ts = tag_ts
+
+                if tag_ts >= last_ts:
                     last_ts = tag_ts
                 else:
                     self.duration += last_ts - first_ts
