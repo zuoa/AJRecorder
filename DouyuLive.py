@@ -92,6 +92,7 @@ class DouyuLive(BaseLive):
             while True:
                 command = self.upload_command_queue.get()
                 if command:
+                    self.refresh_room_info()
                     self.uploader.upload(command["title"], command["finished_videos"], cover=command["cover"])
 
         def _process_timer(self):

@@ -69,7 +69,8 @@ class FlvParser(object):
                 else:
                     self.duration += last_ts - first_ts
                     first_ts = tag_ts
-                    # print(tag_ts)
+                    last_ts = tag_ts
+                    # print(tag_ts, end=",")
         # print(first_ts, last_ts)
         self.duration += last_ts - first_ts
 
