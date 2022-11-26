@@ -1,6 +1,7 @@
 import datetime
 import abc
 import json
+from collections import deque
 import requests
 from requests.adapters import HTTPAdapter
 from logger import Logger
@@ -11,13 +12,14 @@ logger = Logger(__name__).get_logger()
 
 
 class BaseLive(metaclass=abc.ABCMeta):
-    _config = {}
-    room_info = {}
-    recording_file = None
-
     def __init__(self, room_config):
         self.room_config = room_config
         self.room_id = room_config["room_id"]
+        self._config = {}
+        self.room_info = {}
+        self.recording_file = None
+        self.recent_danmaku_queue = deque(maxlen=8000)
+
         self.session = requests.session()
         self.session.mount('https://', HTTPAdapter(max_retries=3))
         headers = self.config.get('common', {}).get('request_header', {})
@@ -69,6 +71,34 @@ class BaseLive(metaclass=abc.ABCMeta):
             self.__live_url = self._get_live_url()
             self.__last_check_url_time = datetime.datetime.now()
         return self.__live_url
+
+    def select_danmaku_trend(self):
+        interval = self.config.get('clipper', {}).get('interval', 30)
+        dt_now = datetime.datetime.now()
+        dt_series = [dt_now - datetime.timedelta(seconds=interval * i) for i in range(10)]
+        danmaku_trend = []
+        while True:
+            yield danmaku_trend
+            danmaku_trend = []
+            dt_now = datetime.datetime.now()
+            dt_series = [(dt_now - datetime.timedelta(seconds=interval * (i + 1)),
+                          dt_now - datetime.timedelta(seconds=interval * i))
+                         for i in range(10)]
+
+            danmu_list = self.recent_danmaku_queue[:]
+
+            for dt in dt_series:
+                trend_node = {
+                    'dt_start': dt[0].strftime('%Y-%m-%d %H:%M:%S'),
+                    'dt_end': dt[1].strftime('%Y-%m-%d %H:%M:%S'),
+                    'danmaku_count': 0
+                }
+                for danmu in danmu_list:
+                    danmu_time = datetime.datetime.strptime(danmu['msg_time'], "%Y-%m-%d %H:%M:%S")
+                    if dt[0] < danmu_time <= dt[1]:
+                        trend_node['danmaku_count'] += 1
+
+                danmaku_trend.append(trend_node)
 
     def push_message(self, title, content):
         push_key = self.config.get('common', {}).get('push_key', '')

@@ -2,6 +2,7 @@ import threading
 import os
 import datetime
 import sqlite3
+import time
 from queue import Queue
 from logger import Logger
 
@@ -63,6 +64,7 @@ class DouyuLive(BaseLive):
 
             @client.danmu
             def danmu(message):
+                self.recent_danmu_queue.put(message)
                 db_cursor.execute("INSERT INTO " + table_name +
                                   "('uid', 'name', 'badge', 'level', 'type', 'content', 'color', 'room_id',\
                                    'room_owner', 'msg_time')\
@@ -88,6 +90,11 @@ class DouyuLive(BaseLive):
             recorder = FlvRecorder(self)
             recorder.run()
 
+        def _clipper(self):
+            while True:
+                print(self.select_danmaku_trend())
+                time.sleep(30)
+
         def _post_uploader(self):
             while True:
                 command = self.upload_command_queue.get()
@@ -99,11 +106,11 @@ class DouyuLive(BaseLive):
             processor = Processor(self)
             processor.process_scheduled()
 
-        return _danmu_monitor, _stream_recorder, _post_uploader, _process_timer
+        return _danmu_monitor, _stream_recorder, _post_uploader, _process_timer, _clipper
 
     def _run(self):
 
-        danmu_monitor, stream_recorder, post_uploader, process_timer = self._create_thread_fn()
+        danmu_monitor, stream_recorder, post_uploader, process_timer, clipper = self._create_thread_fn()
 
         danmu_monitor_thread = threading.Thread(target=danmu_monitor, args=(self,))
         danmu_monitor_thread.setDaemon(True)
@@ -121,6 +128,11 @@ class DouyuLive(BaseLive):
         process_timer_thread.setDaemon(True)
         process_timer_thread.start()
 
+        clipper_thread = threading.Thread(target=clipper, args=(self,))
+        clipper_thread.setDaemon(True)
+        clipper_thread.start()
+
+        clipper_thread.join()
         process_timer_thread.join()
         post_uploader_thread.join()
         stream_recorder_thread.join()
