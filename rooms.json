@@ -3,33 +3,69 @@
     "platform": "douyu",
     "room_id": "73965",
     "room_owner_alias": "孙正",
-    "tags": [
-      "孙正"
-    ],
-    "bili_tid": 171,
-    "overlay_danmaku": true,
-    "active": true
+    "enable": true,
+    "recorder": {
+    },
+    "clipper": {
+      "enable": true,
+      "interval": 30,
+      "up_threshold_radio": 2,
+      "down_threshold_radio": 0.7,
+      "start_offset": -15,
+      "end_offset": 15
+    },
+    "processor": {
+      "overlay_danmaku": true
+    },
+    "uploader": {
+      "bili_tid": 171,
+      "tags": [
+        "孙正"
+      ]
+    }
   },
   {
     "platform": "douyu",
     "room_id": "7828414",
     "room_owner_alias": "煊宝",
-    "tags": [
-      "煊宝"
-    ],
-    "bili_tid": 171,
-    "overlay_danmaku": true,
-    "active": false
+    "enable": false,
+    "recorder": {
+    },
+    "clipper": {
+      "enable": true,
+      "start": "00:00:00",
+      "end": "00:00:00"
+    },
+    "processor": {
+      "overlay_danmaku": true
+    },
+    "uploader": {
+      "bili_tid": 171,
+      "tags": [
+        "煊宝"
+      ]
+    }
   },
   {
     "platform": "douyu",
     "room_id": "7930707",
     "room_owner_alias": "朴雨彬",
-    "tags": [
-      "朴雨彬"
-    ],
-    "bili_tid": 154,
-    "overlay_danmaku": true,
-    "active": false
+    "enable": true,
+    "recorder": {
+    },
+    "clipper": {
+      "enable": false,
+      "start": "00:00:00",
+      "end": "00:00:00"
+    },
+    "processor": {
+      "overlay_danmaku": false
+    },
+    "uploader": {
+      "bili_tid": 171,
+      "tags": [
+        "朴雨彬"
+      ]
+    }
   }
 ]

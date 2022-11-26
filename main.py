@@ -14,7 +14,7 @@ if __name__ == '__main__':
         rooms = json.load(f)
         room_process_list = []
         for room_config in rooms:
-            if room_config.get("active", False):
+            if room_config.get("enable", False):
                 process = Process(target=run, args=(room_config,))
                 process.daemon = True
                 process.start()

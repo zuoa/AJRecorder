@@ -23,13 +23,13 @@ class Uploader(object):
         video.desc = self.live.room_id
         # video.source = 'douyu'
         video.copyright = 1
-        video.tid = room_config.get('bili_tid', 171)
+        video.tid = room_config.get('uploader', {}).get('bili_tid', 171)
         generate_tags = ['直播录像',
                          self.live.room_info["cate_name"],
                          self.live.room_info["room_owner"],
                          self.live.room_id]
 
-        generate_tags.extend(room_config.get('tags', []))
+        generate_tags.extend(room_config.get('uploader', {}).get('tags', []))
 
         if tags:
             generate_tags.extend(tags)
@@ -73,28 +73,3 @@ class Uploader(object):
                         time.sleep(30)
                     else:
                         break
-
-
-if __name__ == '__main__':
-    from DouyuLive import DouyuLive
-
-    room_config = {
-        "platform": "douyu",
-        "room_id": "73965",
-        "room_owner_alias": "孙正",
-        "tags": [
-            "孙正"
-        ],
-        "bili_tid": 171,
-        "overlay_danmaku": True,
-        "active": True
-    }
-    Uploader(DouyuLive(room_config)).upload("【霸气虚幻哥1991】 2022年11月16日 直播回放 弹幕版 ",
-                                            [
-                                                "/Users/yujian/data/AJRecorder/video/output/73965/20221116224129_20221116231129.ass.mp4",
-                                                "/Users/yujian/data/AJRecorder/video/output/73965/20221116231129_20221116234129.ass.mp4",
-                                                "/Users/yujian/data/AJRecorder/video/output/73965/20221116234129_20221117001129.ass.mp4",
-                                                "/Users/yujian/data/AJRecorder/video/output/73965/20221117001129_20221117004129.ass.mp4",
-                                                "/Users/yujian/data/AJRecorder/video/output/73965/20221117004129_20221117004445.ass.mp4",
-                                            ],
-                                            tags=["孙正"])

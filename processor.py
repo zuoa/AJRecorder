@@ -201,6 +201,9 @@ class Processor(object):
         return cut_files
 
     def process_file(self, filepath, start_offset, end_offset):
+
+        is_overlay_danmaku = self.live.room_config.get('processor', {}).get("overlay_danmaku", False)
+
         file = os.path.basename(filepath)
         f_split = file.split("_")
         file_start_time_str = (f_split[1] + f_split[2]).replace(".flv", "")
@@ -214,7 +217,11 @@ class Processor(object):
         ass_filepath = self.generate_ass(start_time_str, end_time_str, "A")
         output_file = f'{self.video_output_dir}/{self.live.room_id}/{start_time.strftime("%Y%m%d%H%M%S")}_{end_time.strftime("%Y%m%d%H%M%S")}.ass.mp4'
 
-        command = f"{self.ffmpeg} -y  -ss {start_offset}  -t {end_offset - start_offset} -accurate_seek -i {filepath}  -vf ass={ass_filepath}   -preset fast -s 1920x1080 -c:v libx264 -c:a aac  -crf 28 -r 30  -b:v 2M -loglevel quiet  -avoid_negative_ts 1 {output_file}"
+        command_expand = ""
+        if is_overlay_danmaku:
+            command_expand = f" -vf ass={ass_filepath}   -preset fast -s 1920x1080 -c:v libx264 -c:a aac  -crf 28 -r 25 "
+
+        command = f"{self.ffmpeg} -y  -ss {start_offset}  -t {end_offset - start_offset} -accurate_seek -i {filepath}  {command_expand}  -b:v 2M -loglevel quiet  -avoid_negative_ts 1 {output_file}"
 
         # threading.Thread(target=ffmpeg_command, args=(command,)).start()
         ffmpeg_command(command)
@@ -264,27 +271,3 @@ class Processor(object):
 
                         self.split_progress_map[filepath]["finished_videos"].append(finished_video)
                         self.split_progress_map[filepath]["split_point"] += self.split_interval
-
-
-if __name__ == '__main__':
-    room_config = {
-        "platform": "douyu",
-        "room_id": "7828414",
-        "room_owner_alias": "煊宝",
-        "tags": [
-            "煊宝"
-        ],
-        "bili_tid": 171,
-        "overlay_danmaku": True,
-        "active": True
-    }
-
-    from DouyuLive import DouyuLive
-
-    processor = Processor(DouyuLive(room_config))
-    processor.generate_cover("/Users/yujian/data/AJRecorder/video/source/7828414/7828414_20221120_152220.flv")
-    # processor.process("2022-11-11 00:20:00", "2022-11-11 01:20:00", "生日快乐")
-    # processor.process("2022-11-09 13:48:00", "2022-11-09 14:48:00", "摄像头和马桶")
-    # cut_file = processor.cut("2022-11-07 23:10:00", "2022-11-08 01:30:00", "ldc")
-    # print(cut_file)
-    # processor.process_file("/Users/yujian/data/AJRecorder/video/source/110/110_20221116_120012.flv", 0, 1800)
