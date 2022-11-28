@@ -127,8 +127,7 @@ class Processor(object):
         simple_end_time = re.sub("\D", "", end_time)
         ass_file = f"{self.video_output_dir}/{self.live.room_id}/{tag}_{simple_start_time}_{simple_end_time}.ass"
 
-        db = DanmuDB(self.live.room_id)
-        danmu_list = db.query(start_time, end_time)
+        danmu_list = self.live.danmaku_db.query(start_time, end_time)
         ass = Ass(danmu_list, start_time, ass_file)
         ass.flush()
 

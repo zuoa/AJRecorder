@@ -1,14 +1,19 @@
 import datetime
+import re
 import abc
 import json
 from collections import deque
 import requests
 from requests.adapters import HTTPAdapter
+import jieba.analyse
 from logger import Logger
+from danmu.DanmuDB import DanmuDB
 from processor import Processor
 from uploader import Uploader
 
 logger = Logger(__name__).get_logger()
+
+jieba.analyse.set_stop_words('stopwords.txt')
 
 
 class BaseLive(metaclass=abc.ABCMeta):
@@ -19,6 +24,9 @@ class BaseLive(metaclass=abc.ABCMeta):
         self.room_info = {}
         self.recording_file = None
         self.recent_danmaku_queue = deque(maxlen=8000)
+        self.clipping_start_time = None
+        self.clipping_end_time = None
+        self.danmaku_db = DanmuDB(self.room_id)
 
         self.session = requests.session()
         self.session.mount('https://', HTTPAdapter(max_retries=3))
@@ -85,19 +93,22 @@ class BaseLive(metaclass=abc.ABCMeta):
                           dt_now - datetime.timedelta(seconds=interval * i))
                          for i in range(10)]
 
-            danmu_list = self.recent_danmaku_queue[:]
+            danmu_list = self.recent_danmaku_queue.copy()
 
             for dt in dt_series:
                 trend_node = {
                     'dt_start': dt[0].strftime('%Y-%m-%d %H:%M:%S'),
                     'dt_end': dt[1].strftime('%Y-%m-%d %H:%M:%S'),
-                    'danmaku_count': 0
+                    'danmaku_count': 1
                 }
+                words = ""
                 for danmu in danmu_list:
-                    danmu_time = datetime.datetime.strptime(danmu['msg_time'], "%Y-%m-%d %H:%M:%S")
-                    if dt[0] < danmu_time <= dt[1]:
+                    # danmu_time = datetime.datetime.strptime(danmu['msg_time'], "%Y-%m-%d %H:%M:%S")
+                    if dt[0] < danmu['msg_time'] <= dt[1]:
                         trend_node['danmaku_count'] += 1
+                        words += re.sub("@.*：", " ", danmu['content']) + " "
 
+                trend_node["keywords"] = jieba.analyse.extract_tags(words, topK=10)
                 danmaku_trend.append(trend_node)
 
     def push_message(self, title, content):

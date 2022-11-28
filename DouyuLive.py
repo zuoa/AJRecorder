@@ -1,3 +1,4 @@
+import json
 import threading
 import os
 import datetime
@@ -64,7 +65,7 @@ class DouyuLive(BaseLive):
 
             @client.danmu
             def danmu(message):
-                self.recent_danmu_queue.put(message)
+                self.recent_danmaku_queue.append(message)
                 db_cursor.execute("INSERT INTO " + table_name +
                                   "('uid', 'name', 'badge', 'level', 'type', 'content', 'color', 'room_id',\
                                    'room_owner', 'msg_time')\
@@ -91,8 +92,30 @@ class DouyuLive(BaseLive):
             recorder.run()
 
         def _clipper(self):
-            while True:
-                print(self.select_danmaku_trend())
+            for trend in self.select_danmaku_trend():
+                if not trend:
+                    continue
+                with open(f"trend_{self.room_id}.txt", "a", encoding="utf-8") as f:
+                    f.write(json.dumps(trend, ensure_ascii=False) + "\n")
+                    f.flush()
+
+                up_value = self.room_config.get("clipper", {}).get("up_threshold_value", 100)
+                up_radio = self.room_config.get("clipper", {}).get("up_threshold_radio", 1.5)
+                down_radio = self.room_config.get("clipper", {}).get("down_threshold_radio", 0.7)
+
+                if not self.clipping_start_time:
+                    if trend[0]['danmaku_count'] > up_value and trend[1]['danmaku_count'] > up_value and \
+                            trend[0]['danmaku_count'] / trend[2]['danmaku_count'] > up_radio and \
+                            trend[1]['danmaku_count'] / trend[2]['danmaku_count'] > up_radio:
+                        self.clipping_start_time = trend[1]['dt_start']
+                        print(f'clipping_start_time: {self.clipping_start_time}')
+                else:
+                    if trend[0]['danmaku_count'] / trend[1]['danmaku_count'] < down_radio and \
+                            trend[0]['danmaku_count'] / trend[2]['danmaku_count'] < down_radio:
+                        self.clipping_end_time = trend[0]['dt_end']
+                        print(f'clipping_end_time: {self.clipping_end_time}')
+                        self.clipping_start_time = None
+                        self.clipping_end_time = None
                 time.sleep(30)
 
         def _post_uploader(self):

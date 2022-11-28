@@ -9,7 +9,8 @@
     "clipper": {
       "enable": true,
       "interval": 30,
-      "up_threshold_radio": 2,
+      "up_threshold_radio": 1.5,
+      "up_threshold_value": 80,
       "down_threshold_radio": 0.7,
       "start_offset": -15,
       "end_offset": 15
@@ -50,7 +51,7 @@
     "platform": "douyu",
     "room_id": "7930707",
     "room_owner_alias": "朴雨彬",
-    "enable": true,
+    "enable": false,
     "recorder": {
     },
     "clipper": {
@@ -65,6 +66,27 @@
       "bili_tid": 171,
       "tags": [
         "朴雨彬"
+      ]
+    }
+  },
+  {
+    "platform": "douyu",
+    "room_id": "5551871",
+    "room_owner_alias": "Minana呀",
+    "enable": true,
+    "recorder": {
+    },
+    "clipper": {
+      "enable": false,
+      "start": "00:00:00",
+      "end": "00:00:00"
+    },
+    "processor": {
+      "overlay_danmaku": false
+    },
+    "uploader": {
+      "bili_tid": 171,
+      "tags": [
       ]
     }
   }
