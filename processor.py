@@ -127,7 +127,8 @@ class Processor(object):
         simple_end_time = re.sub("\D", "", end_time)
         ass_file = f"{self.video_output_dir}/{self.live.room_id}/{tag}_{simple_start_time}_{simple_end_time}.ass"
 
-        danmu_list = self.live.danmaku_db.query(start_time, end_time)
+        db = DanmuDB(self.live.room_id)
+        danmu_list = db.query(start_time, end_time)
         ass = Ass(danmu_list, start_time, ass_file)
         ass.flush()
 
@@ -237,6 +238,10 @@ class Processor(object):
         return f'【{self.live.room_info["room_owner"]}】 {day} {f_split[2][:2]}时 直播回放 弹幕版 <{self.live.room_info["room_name"]}>'
 
     def process_scheduled(self):
+        processor_enable = self.live.room_config.get('processor', {}).get("enable", False)
+        if not processor_enable:
+            return
+
         while True:
             split_command = self.live.split_command_queue.get()
             filepath = split_command["filepath"]

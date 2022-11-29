@@ -16,12 +16,42 @@
       "end_offset": 15
     },
     "processor": {
+      "enable": true,
       "overlay_danmaku": true
     },
     "uploader": {
+      "enable": true,
       "bili_tid": 171,
       "tags": [
         "孙正"
+      ]
+    }
+  },
+  {
+    "platform": "douyu",
+    "room_id": "110",
+    "room_owner_alias": "谢彬DD",
+    "enable": true,
+    "recorder": {
+    },
+    "clipper": {
+      "enable": true,
+      "interval": 30,
+      "up_threshold_radio": 1.5,
+      "up_threshold_value": 80,
+      "down_threshold_radio": 0.7,
+      "start_offset": -15,
+      "end_offset": 15
+    },
+    "processor": {
+      "enable": false,
+      "overlay_danmaku": true
+    },
+    "uploader": {
+      "enable": false,
+      "bili_tid": 171,
+      "tags": [
+        "谢彬DD"
       ]
     }
   },
@@ -38,9 +68,11 @@
       "end": "00:00:00"
     },
     "processor": {
+      "enable": true,
       "overlay_danmaku": true
     },
     "uploader": {
+      "enable": true,
       "bili_tid": 171,
       "tags": [
         "煊宝"
@@ -60,9 +92,11 @@
       "end": "00:00:00"
     },
     "processor": {
+      "enable": true,
       "overlay_danmaku": false
     },
     "uploader": {
+      "enable": true,
       "bili_tid": 171,
       "tags": [
         "朴雨彬"
@@ -82,9 +116,11 @@
       "end": "00:00:00"
     },
     "processor": {
+      "enable": true,
       "overlay_danmaku": false
     },
     "uploader": {
+      "enable": true,
       "bili_tid": 171,
       "tags": [
       ]
