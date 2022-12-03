@@ -57,22 +57,55 @@
   },
   {
     "platform": "douyu",
-    "room_id": "7828414",
-    "room_owner_alias": "煊宝",
-    "enable": false,
+    "room_id": "6916090",
+    "room_owner_alias": "Grace小万万",
+    "enable": true,
     "recorder": {
     },
     "clipper": {
       "enable": true,
-      "start": "00:00:00",
-      "end": "00:00:00"
+      "interval": 30,
+      "up_threshold_radio": 1.5,
+      "up_threshold_value": 80,
+      "down_threshold_radio": 0.7,
+      "start_offset": -15,
+      "end_offset": 15
+    },
+    "processor": {
+      "enable": false,
+      "overlay_danmaku": true
+    },
+    "uploader": {
+      "enable": false,
+      "bili_tid": 171,
+      "tags": [
+        "小万万",
+        "万万"
+      ]
+    }
+  },
+  {
+    "platform": "douyu",
+    "room_id": "7828414",
+    "room_owner_alias": "煊宝",
+    "enable": true,
+    "recorder": {
+    },
+    "clipper": {
+      "enable": true,
+      "interval": 30,
+      "up_threshold_radio": 1.5,
+      "up_threshold_value": 80,
+      "down_threshold_radio": 0.7,
+      "start_offset": -15,
+      "end_offset": 15
     },
     "processor": {
       "enable": true,
       "overlay_danmaku": true
     },
     "uploader": {
-      "enable": true,
+      "enable": false,
       "bili_tid": 171,
       "tags": [
         "煊宝"
@@ -83,21 +116,25 @@
     "platform": "douyu",
     "room_id": "7930707",
     "room_owner_alias": "朴雨彬",
-    "enable": false,
+    "enable": true,
     "recorder": {
     },
     "clipper": {
-      "enable": false,
-      "start": "00:00:00",
-      "end": "00:00:00"
+      "enable": true,
+      "interval": 30,
+      "up_threshold_radio": 1.5,
+      "up_threshold_value": 80,
+      "down_threshold_radio": 0.7,
+      "start_offset": -15,
+      "end_offset": 15
     },
     "processor": {
       "enable": true,
-      "overlay_danmaku": false
+      "overlay_danmaku": true
     },
     "uploader": {
-      "enable": true,
-      "bili_tid": 171,
+      "enable": false,
+      "bili_tid": 154,
       "tags": [
         "朴雨彬"
       ]
@@ -107,22 +144,28 @@
     "platform": "douyu",
     "room_id": "5551871",
     "room_owner_alias": "Minana呀",
-    "enable": false,
+    "enable": true,
     "recorder": {
     },
     "clipper": {
-      "enable": false,
-      "start": "00:00:00",
-      "end": "00:00:00"
+      "enable": true,
+      "interval": 30,
+      "up_threshold_radio": 1.5,
+      "up_threshold_value": 80,
+      "down_threshold_radio": 0.7,
+      "start_offset": -15,
+      "end_offset": 15
     },
     "processor": {
       "enable": true,
-      "overlay_danmaku": false
+      "overlay_danmaku": true
     },
     "uploader": {
-      "enable": true,
-      "bili_tid": 171,
+      "enable": false,
+      "bili_tid": 154,
       "tags": [
+        "Minana",
+        "米娜"
       ]
     }
   }
