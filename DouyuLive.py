@@ -166,7 +166,7 @@ class DouyuLive(BaseLive):
         main_thread.start()
         main_thread.join()
 
-    def upload_file(self, title, filepath, start_time_str, end_time_str):
+    def upload_file(self, title, filepath, start_time_str, end_time_str, cover=None, tags=[]):
         processor = Processor(self)
 
         file = os.path.basename(filepath)
@@ -179,4 +179,4 @@ class DouyuLive(BaseLive):
         start_offset = (start_time - file_start_time).seconds
         end_offset = (end_time - file_start_time).seconds
         output_file = processor.process_file(filepath, start_offset, end_offset)
-        self.uploader.upload(title, [output_file], tags=["煊正"])
+        self.uploader.upload(title, [output_file], cover=cover, tags=tags)

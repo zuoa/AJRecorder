@@ -220,7 +220,8 @@ class Processor(object):
         command_expand = ""
         if is_overlay_danmaku:
             command_expand = f" -vf ass={ass_filepath}   -preset fast -s 1920x1080 -c:v libx264 -c:a aac  -crf 28 -r 25 "
-
+        else:
+            command_expand = " -c:v copy -c:a copy "
         command = f"{self.ffmpeg} -y  -ss {start_offset}  -t {end_offset - start_offset} -accurate_seek -i {filepath}  {command_expand}  -b:v 2M -loglevel quiet  -avoid_negative_ts 1 {output_file}"
 
         # threading.Thread(target=ffmpeg_command, args=(command,)).start()
