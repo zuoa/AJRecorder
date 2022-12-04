@@ -203,6 +203,7 @@ class Processor(object):
     def process_file(self, filepath, start_offset, end_offset):
 
         is_overlay_danmaku = self.live.room_config.get('processor', {}).get("overlay_danmaku", False)
+        is_hwaccel_enable = self.live.config.get('common', {}).get("hwaccel_enable", False)
 
         file = os.path.basename(filepath)
         f_split = file.split("_")
@@ -218,11 +219,16 @@ class Processor(object):
         output_file = f'{self.video_output_dir}/{self.live.room_id}/{start_time.strftime("%Y%m%d%H%M%S")}_{end_time.strftime("%Y%m%d%H%M%S")}.ass.mp4'
 
         command_expand = ""
+
+        hwaccel = "-hwaccel cuvid -c:v h264_cuvid " if is_hwaccel_enable else ""
+
         if is_overlay_danmaku:
-            command_expand = f" -vf ass={ass_filepath}   -preset fast -s 1920x1080 -c:v libx264 -c:a aac  -crf 28 -r 25 "
+            video_encoder = "h264_nvenc" if is_hwaccel_enable else "libx264"
+            command_expand = f" -vf ass={ass_filepath}   -preset fast -s 1920x1080 -c:v {video_encoder} -c:a aac  -crf 28 -r 25 "
         else:
             command_expand = " -c:v copy -c:a copy "
-        command = f"{self.ffmpeg} -y  -ss {start_offset}  -t {end_offset - start_offset} -accurate_seek -i {filepath}  {command_expand}  -b:v 2M -loglevel quiet  -avoid_negative_ts 1 {output_file}"
+
+        command = f"{self.ffmpeg} {hwaccel} -y  -ss {start_offset}  -t {end_offset - start_offset} -accurate_seek -i {filepath}  {command_expand}  -b:v 2M -loglevel quiet  -avoid_negative_ts 1 {output_file}"
 
         # threading.Thread(target=ffmpeg_command, args=(command,)).start()
         ffmpeg_command(command)

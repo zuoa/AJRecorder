@@ -1,6 +1,7 @@
 {
   "common": {
     "ffmpeg_path": "/Users/yujian/ffmpeg",
+    "hwaccel_enable": true,
     "video_source_dir": "/Users/yujian/data/AJRecorder/video/source",
     "video_output_dir": "/Users/yujian/data/AJRecorder/video/output",
     "push_key": "SCT5855T0QnbnN93eSRSlUZrn9WrPBai",
