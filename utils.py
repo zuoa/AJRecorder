@@ -1,8 +1,11 @@
 import datetime
 from moviepy.editor import VideoFileClip
 import traceback
-from PIL import ImageFont
+from PIL import Image, ImageFont, ImageDraw
 from FlvParser import FlvParser
+import jieba.analyse
+
+jieba.analyse.set_stop_words('stopwords.txt')
 
 
 def get_video_duration(filename):
@@ -43,6 +46,31 @@ def generate_part_title(filename):
     start = t.split("_")[0]
     start_time = datetime.datetime.strptime(start, "%Y%m%d%H%M%S")
     return start_time.strftime("%m月%d日 %H时%M分")
+
+
+def extract_tags(text, top=10):
+    return jieba.analyse.extract_tags(text, topK=top)
+
+
+def image_add_text(img_path, words, x, y, font_size=128):
+    im = Image.open(img_path)
+    im = im.convert('RGBA')
+    font_size = 128
+    fill_color = (255, 255, 0, 200)
+    shadow_color = (0, 0, 0, 160)
+
+    text_overlay = Image.new('RGBA', im.size, (255, 255, 255, 0))
+    image_draw = ImageDraw.Draw(text_overlay)
+
+    font = "fzht.ttf"
+    font = ImageFont.truetype(font, font_size)
+    for i, word in enumerate(words):
+        image_draw.text((x, (y + 16) * i), word, font=font, fill=fill_color, stroke_fill=shadow_color, stroke_width=8)
+
+    im = Image.alpha_composite(im, text_overlay)
+    output = img_path + ".png"
+    im.save(output)
+    return output
 
 
 if __name__ == '__main__':

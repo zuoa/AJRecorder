@@ -5,7 +5,7 @@ import re
 import time
 import traceback
 
-from utils import get_video_duration, get_video_real_duration
+from utils import get_video_duration, get_video_real_duration, extract_tags, image_add_text
 from danmu.DanmuDB import DanmuDB
 from danmu.DanmuAss import Ass
 
@@ -155,13 +155,19 @@ class Processor(object):
             print(danmu_top_list[:3])
             minute = danmu_top_list[0]["minute"]
             minute_time = datetime.datetime.strptime(minute, "%Y-%m-%d %H:%M:%S")
+
+            content = danmu_top_list[0]["content"]
+            keywords = extract_tags(content)
+
             simple_minute = minute_time.strftime("%Y%m%d%H%M%S")
             cover_file = f"{self.video_output_dir}/{self.live.room_id}/COVER_{simple_start_time}_{simple_end_time}_{simple_minute}.jpg"
 
             start_offset = (minute_time - file_start_time).seconds
             command = f"{self.ffmpeg} -ss {start_offset}  -i {filepath}  -r 1 -vframes 1 -an  -vcodec mjpeg -loglevel quiet  {cover_file}"
             os.system(command)
-            print(cover_file)
+
+            if keywords:
+                cover_file = image_add_text(cover_file, keywords, 32, 32)
         return cover_file
 
     def process(self, start_time, end_time, tag):

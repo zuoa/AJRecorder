@@ -50,7 +50,7 @@ class DanmuDB(object):
 
     def get_top_minute(self, start_time, end_time):
         self._cursor.execute(
-            f"SELECT strftime('%Y-%m-%d %H:%M:00', msg_time) as minute, count(*) as count FROM {self._table_name} WHERE msg_time >= '{start_time}' AND msg_time <= '{end_time}' GROUP BY strftime('%Y-%m-%d %H:%M:00', msg_time) ORDER BY count DESC")
+            f"SELECT strftime('%Y-%m-%d %H:%M:00', msg_time) as minute, count(*) as count, group_concat(content) as content FROM {self._table_name} WHERE msg_time >= '{start_time}' AND msg_time <= '{end_time}' GROUP BY strftime('%Y-%m-%d %H:%M:00', msg_time) ORDER BY count DESC")
         return self._cursor.fetchall()
     def close(self):
         self._conn.close()
