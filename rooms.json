@@ -130,10 +130,10 @@
     },
     "processor": {
       "enable": true,
-      "overlay_danmaku": true
+      "overlay_danmaku": false
     },
     "uploader": {
-      "enable": false,
+      "enable": true,
       "bili_tid": 154,
       "tags": [
         "朴雨彬"
@@ -158,10 +158,10 @@
     },
     "processor": {
       "enable": true,
-      "overlay_danmaku": true
+      "overlay_danmaku": false
     },
     "uploader": {
-      "enable": false,
+      "enable": true,
       "bili_tid": 154,
       "tags": [
         "Minana",
