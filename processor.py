@@ -220,7 +220,7 @@ class Processor(object):
 
         command_expand = ""
 
-        hwaccel = "-hwaccel cuvid -c:v h264_cuvid " if is_hwaccel_enable else ""
+        hwaccel = "-c:v h264_cuvid " if is_hwaccel_enable else ""
 
         if is_overlay_danmaku:
             video_encoder = "h264_nvenc" if is_hwaccel_enable else "libx264"
