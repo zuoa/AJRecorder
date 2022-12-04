@@ -6,6 +6,7 @@ import execjs
 import requests
 from logger import Logger
 
+
 class DouYu:
     """
     可用来替换返回链接中的主机部分
@@ -61,7 +62,8 @@ class DouYu:
         key = ''
         if data:
             rtmp_live = data['rtmp_live']
-            key = re.search(r'(\d{1,7}[0-9a-zA-Z]+)_?\d{0,4}(/playlist|.m3u8)', rtmp_live).group(1)
+            if re.search(r'(\d{1,7}[0-9a-zA-Z]+)_?\d{0,4}(/playlist|.m3u8)', rtmp_live):
+                key = re.search(r'(\d{1,7}[0-9a-zA-Z]+)_?\d{0,4}(/playlist|.m3u8)', rtmp_live).group(1)
         return error, key
 
     def get_js(self):
