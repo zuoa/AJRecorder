@@ -16,11 +16,11 @@
       "end_offset": 15
     },
     "processor": {
-      "enable": false,
+      "enable": true,
       "overlay_danmaku": true
     },
     "uploader": {
-      "enable": false,
+      "enable": true,
       "bili_tid": 171,
       "tags": [
         "孙正"
@@ -105,7 +105,7 @@
       "overlay_danmaku": true
     },
     "uploader": {
-      "enable": false,
+      "enable": true,
       "bili_tid": 171,
       "tags": [
         "煊宝"
