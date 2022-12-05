@@ -231,7 +231,7 @@ class Processor(object):
 
         if is_overlay_danmaku:
             video_encoder = "h264_nvenc" if is_hwaccel_enable else "libx264"
-            command_expand = f" -vf ass={ass_filepath}   -preset fast -s 1920x1080 -c:v {video_encoder} -c:a aac  -crf 28 -r 25 "
+            command_expand = f" -vf ass={ass_filepath}   -preset fast -s 1920x1080 -c:v {video_encoder} -c:a aac  -crf 25 -r 30 "
         else:
             command_expand = " -c:v copy -c:a copy "
 
