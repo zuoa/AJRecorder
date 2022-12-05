@@ -48,7 +48,7 @@ def ffmpeg_command(command):
 
 
 class Processor(object):
-    split_interval = 1800
+    split_interval = 3600
     split_progress_map = {}
 
     def __init__(self, live):
