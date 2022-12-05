@@ -65,7 +65,7 @@ def image_add_text(img_path, words, x, y, font_size=128):
     font = "fzht.ttf"
     font = ImageFont.truetype(font, font_size)
     for i, word in enumerate(words):
-        image_draw.text((x, (y + 16) * i), word, font=font, fill=fill_color, stroke_fill=shadow_color, stroke_width=8)
+        image_draw.text((x, y + (font_size + 16) * i), word, font=font, fill=fill_color, stroke_fill=shadow_color, stroke_width=8)
 
     im = Image.alpha_composite(im, text_overlay)
     output = img_path + ".png"
