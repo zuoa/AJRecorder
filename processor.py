@@ -4,6 +4,7 @@ import subprocess
 import re
 import time
 import traceback
+from logger import Logger
 
 from utils import get_video_duration, get_video_real_duration, extract_tags, image_add_text
 from danmu.DanmuDB import DanmuDB
@@ -251,6 +252,7 @@ class Processor(object):
         return f'【{self.live.room_info["room_owner"]}】 {day} {f_split[2][:2]}时 直播回放 弹幕版 <{self.live.room_info["room_name"]}>'
 
     def process_scheduled(self):
+        logger = Logger(__name__).get_logger()
         processor_enable = self.live.room_config.get('processor', {}).get("enable", False)
         if not processor_enable:
             return
@@ -265,7 +267,8 @@ class Processor(object):
                 if filepath not in self.split_progress_map:
                     self.split_progress_map[filepath] = {"split_point": 0, "finished_videos": []}
 
-                print(split_command, duration, self.split_progress_map[filepath]["split_point"])
+                logger.info(self.live.generate_log(
+                    '{} {} {}'.format(split_command, duration, self.split_progress_map[filepath]["split_point"])))
 
                 if is_complete:
                     finished_video = self.process_file(filepath,
