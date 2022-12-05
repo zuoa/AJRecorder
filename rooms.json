@@ -129,11 +129,11 @@
       "end_offset": 15
     },
     "processor": {
-      "enable": true,
+      "enable": false,
       "overlay_danmaku": false
     },
     "uploader": {
-      "enable": true,
+      "enable": false,
       "bili_tid": 154,
       "tags": [
         "朴雨彬"
@@ -157,11 +157,11 @@
       "end_offset": 15
     },
     "processor": {
-      "enable": true,
+      "enable": false,
       "overlay_danmaku": false
     },
     "uploader": {
-      "enable": true,
+      "enable": false,
       "bili_tid": 154,
       "tags": [
         "Minana",
