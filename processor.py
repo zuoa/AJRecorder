@@ -168,7 +168,7 @@ class Processor(object):
             os.system(command)
 
             if keywords:
-                cover_file = image_add_text(cover_file, keywords, 32, 32)
+                cover_file = image_add_text(cover_file, keywords, 200, 32)
         return cover_file
 
     def process(self, start_time, end_time, tag):
