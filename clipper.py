@@ -1,6 +1,7 @@
 import os
 import datetime
 import subprocess
+import threading
 import re
 import time
 import traceback
@@ -45,6 +46,22 @@ def ffmpeg_command(command):
         traceback.print_exc()
         print("command '{}' return with error (code {}): {}".format(e.cmd, e.returncode, e.output))
         return e
+
+
+class ClipThread(threading.Thread):
+    def __init__(self, func, args):
+        super(ClipThread, self).__init__()
+        self.func = func
+        self.args = args
+
+    def run(self):
+        self.result = self.func(*self.args)
+
+    def get_result(self):
+        try:
+            return self.result
+        except Exception:
+            return None
 
 
 class Clipper(object):
@@ -208,20 +225,30 @@ class Clipper(object):
         return cut_files
 
     def clip_segment_list(self, filepath):
-        file = os.path.basename(filepath)
-        f_split = file.split("_")
-        video_files = []
+
+        video_output_files = []
+        clip_threads = []
+
         duration = get_video_real_duration(filepath)
         for offset in range(0, duration, self.clip_segment_duration):
             start_offset = offset
             end_offset = start_offset + self.clip_segment_duration
             if end_offset > duration:
                 end_offset = duration
-            outout_file = self.clip(filepath, start_offset, end_offset)
-            video_files.append(outout_file)
-        return video_files
+            clip_segment_thread = ClipThread(self.clip, (filepath, start_offset, end_offset,))
+            clip_segment_thread.setDaemon(True)
+            clip_segment_thread.start()
+            clip_threads.append(clip_segment_thread)
+
+        for t in clip_threads:
+            t.join()
+            result = t.get_result()
+            if result:
+                video_output_files.append(result)
+        return video_output_files
 
     def clip(self, filepath, start_offset, end_offset):
+        print(self.ffmpeg)
 
         is_overlay_danmaku = self.live.room_config.get("clipper", {}).get("overlay_danmaku", False)
         is_hwaccel_enable = self.live.config.get('common', {}).get("hwaccel_enable", False)
