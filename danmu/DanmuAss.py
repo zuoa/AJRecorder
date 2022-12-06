@@ -45,7 +45,7 @@ Timer: 10.0000
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: R2L,{FONT_FAMILY},{FONT_SIZE},&H10FFFFFF,&H99FFFFFF,&H99000000,&H99000000,1,0,0,0,100,100,0,0,1,1,0,2,20,20,2,0
+Style: R2L,{FONT_FAMILY},{FONT_SIZE},&H10FFFFFF,&H99FFFFFF,&H99000000,&H99000000,1,0,0,0,100,100,0,0,1,3,0,2,20,20,2,0
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
