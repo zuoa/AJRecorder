@@ -95,7 +95,11 @@ class DouyuLive(BaseLive):
             for trend in self.select_danmaku_trend():
                 if not trend:
                     continue
-                with open(f"trend_{self.room_id}.txt", "a", encoding="utf-8") as f:
+
+                output = f"output/hot/trend_{self.room_id}.log"
+                if not os.path.exists(os.path.dirname(output)):
+                    os.makedirs(os.path.dirname(output))
+                with open(output, "a", encoding="utf-8") as f:
                     f.write(json.dumps(trend, ensure_ascii=False) + "\n")
                     f.flush()
 
@@ -108,12 +112,12 @@ class DouyuLive(BaseLive):
                             trend[0]['danmaku_count'] / trend[2]['danmaku_count'] > up_radio and \
                             trend[1]['danmaku_count'] / trend[2]['danmaku_count'] > up_radio:
                         self.clipping_start_time = trend[1]['dt_start']
-                        print(f'clipping_start_time: {self.clipping_start_time}')
+                        print(self.generate_log(f'hot_start_time: {self.clipping_start_time}'))
                 else:
                     if trend[0]['danmaku_count'] / trend[1]['danmaku_count'] < down_radio and \
                             trend[0]['danmaku_count'] / trend[2]['danmaku_count'] < down_radio:
                         self.clipping_end_time = trend[0]['dt_end']
-                        print(f'clipping_end_time: {self.clipping_end_time}')
+                        print(self.generate_log(f'hot_end_time: {self.clipping_end_time}'))
                         self.clipping_start_time = None
                         self.clipping_end_time = None
                 time.sleep(30)
