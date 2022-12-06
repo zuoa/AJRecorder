@@ -210,14 +210,16 @@ class Clipper(object):
     def clip_segment_list(self, filepath):
         file = os.path.basename(filepath)
         f_split = file.split("_")
-        file_start_time_str = (f_split[1] + f_split[2]).replace(".flv", "")
+        video_files = []
         duration = get_video_real_duration(filepath)
         for offset in range(0, duration, self.clip_segment_duration):
             start_offset = offset
             end_offset = start_offset + self.clip_segment_duration
             if end_offset > duration:
                 end_offset = duration
-            self.clip(filepath, start_offset, end_offset)
+            outout_file = self.clip(filepath, start_offset, end_offset)
+            video_files.append(outout_file)
+        return video_files
 
     def clip(self, filepath, start_offset, end_offset):
 

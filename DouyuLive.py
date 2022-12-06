@@ -172,7 +172,8 @@ class DouyuLive(BaseLive):
 
     def clip_upload(self, title, filepath, cover=None, tags=[]):
         clipper = Clipper(self)
-        clipper.clip(filepath)
+        video_list = clipper.clip_segment_list(filepath)
+        self.uploader.upload(title, video_list, cover=cover, tags=tags)
 
     def upload_file(self, title, filepath, start_time_str, end_time_str, cover=None, tags=[]):
         clipper = Clipper(self)
