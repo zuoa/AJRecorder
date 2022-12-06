@@ -241,15 +241,15 @@ class Clipper(object):
 
         command_expand = ""
 
-        hwaccel = "-c:v h264_cuvid " if is_hwaccel_enable else ""
+        hwaccel = "-hwaccel cuda -c:v h264_cuvid " if is_hwaccel_enable else ""
 
         if is_overlay_danmaku:
             video_encoder = "h264_nvenc" if is_hwaccel_enable else "libx264"
-            command_expand = f" -vf ass={ass_filepath}   -preset fast -s 1920x1080 -c:v {video_encoder} -c:a aac  -crf 25 -r 30 "
+            command_expand = f" -vf ass={ass_filepath}   -s 1920x1080 -c:v {video_encoder} -c:a aac  -crf 25 -r 30 "
         else:
             command_expand = " -c:v copy -c:a copy "
 
-        command = f"{self.ffmpeg} {hwaccel} -y  -ss {start_offset}  -t {end_offset - start_offset} -accurate_seek -i {filepath}  {command_expand}  -b:v 2M -loglevel quiet  -avoid_negative_ts 1 {output_file}"
+        command = f"{self.ffmpeg} {hwaccel} -y  -ss {start_offset}  -t {end_offset - start_offset} -accurate_seek -i {filepath}  {command_expand}  -loglevel quiet  -avoid_negative_ts 1 {output_file}"
 
         # threading.Thread(target=ffmpeg_command, args=(command,)).start()
         ffmpeg_command(command)
