@@ -225,31 +225,17 @@ class Clipper(object):
         return cut_files
 
     def clip_segment_list(self, filepath):
-
         video_output_files = []
-        clip_threads = []
-
         duration = get_video_real_duration(filepath)
         for offset in range(0, duration, self.clip_segment_duration):
             start_offset = offset
             end_offset = start_offset + self.clip_segment_duration
             if end_offset > duration:
                 end_offset = duration
-            clip_segment_thread = ClipThread(self.clip, (filepath, start_offset, end_offset,))
-            clip_segment_thread.setDaemon(True)
-            clip_segment_thread.start()
-            clip_threads.append(clip_segment_thread)
-
-        for t in clip_threads:
-            t.join()
-            result = t.get_result()
-            if result:
-                video_output_files.append(result)
+            self.clip(filepath, start_offset, end_offset)
         return video_output_files
 
     def clip(self, filepath, start_offset, end_offset):
-        print(self.ffmpeg)
-
         is_overlay_danmaku = self.live.room_config.get("clipper", {}).get("overlay_danmaku", False)
         is_hwaccel_enable = self.live.config.get('common', {}).get("hwaccel_enable", False)
 
