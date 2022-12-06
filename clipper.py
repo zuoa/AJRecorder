@@ -47,7 +47,7 @@ def ffmpeg_command(command):
         return e
 
 
-class Processor(object):
+class Clipper(object):
 
     def __init__(self, live):
         self.live = live
@@ -209,7 +209,7 @@ class Processor(object):
 
     def process_file(self, filepath, start_offset, end_offset):
 
-        is_overlay_danmaku = self.live.room_config.get('processor', {}).get("overlay_danmaku", False)
+        is_overlay_danmaku = self.live.room_config.get("clipper", {}).get("overlay_danmaku", False)
         is_hwaccel_enable = self.live.config.get('common', {}).get("hwaccel_enable", False)
 
         file = os.path.basename(filepath)
@@ -253,8 +253,8 @@ class Processor(object):
 
     def process_scheduled(self):
         logger = Logger(__name__).get_logger()
-        processor_enable = self.live.room_config.get('processor', {}).get("enable", False)
-        if not processor_enable:
+        clipper_enable = self.live.room_config.get("clipper", {}).get("enable", False)
+        if not clipper_enable:
             return
 
         while True:

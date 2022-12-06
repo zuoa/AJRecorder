@@ -121,7 +121,7 @@ def upload(video_path, start_offset, end_offset, cover=None):
             "start_offset": -15,
             "end_offset": 15
         },
-        "processor": {
+        "clipper": {
             "enable": True,
             "overlay_danmaku": True
         },

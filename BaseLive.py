@@ -8,7 +8,7 @@ from requests.adapters import HTTPAdapter
 import jieba.analyse
 from logger import Logger
 from danmu.DanmuDB import DanmuDB
-from processor import Processor
+from clipper import Clipper
 from uploader import Uploader
 
 logger = Logger(__name__).get_logger()

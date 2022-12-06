@@ -15,7 +15,7 @@
       "start_offset": -15,
       "end_offset": 15
     },
-    "processor": {
+    "clipper": {
       "enable": true,
       "overlay_danmaku": true
     },
@@ -43,7 +43,7 @@
       "start_offset": -15,
       "end_offset": 15
     },
-    "processor": {
+    "clipper": {
       "enable": false,
       "overlay_danmaku": true
     },
@@ -71,7 +71,7 @@
       "start_offset": -15,
       "end_offset": 15
     },
-    "processor": {
+    "clipper": {
       "enable": false,
       "overlay_danmaku": true
     },
@@ -100,7 +100,7 @@
       "start_offset": -15,
       "end_offset": 15
     },
-    "processor": {
+    "clipper": {
       "enable": true,
       "overlay_danmaku": true
     },
@@ -128,7 +128,7 @@
       "start_offset": -15,
       "end_offset": 15
     },
-    "processor": {
+    "clipper": {
       "enable": false,
       "overlay_danmaku": false
     },
@@ -156,7 +156,7 @@
       "start_offset": -15,
       "end_offset": 15
     },
-    "processor": {
+    "clipper": {
       "enable": false,
       "overlay_danmaku": false
     },

@@ -8,7 +8,7 @@ from queue import Queue
 from logger import Logger
 
 from BaseLive import BaseLive
-from processor import Processor
+from clipper import Clipper
 from realurl.douyu import DouYu
 from recorder import FlvRecorder
 from danmu.douyu import DouyuClient
@@ -130,8 +130,8 @@ class DouyuLive(BaseLive):
                     self.uploader.upload(command["title"], command["finished_videos"], cover=command["cover"])
 
         def _process_timer(self):
-            processor = Processor(self)
-            processor.process_scheduled()
+            clipper = Clipper(self)
+            clipper.process_scheduled()
 
         return _danmu_monitor, _stream_recorder, _post_uploader, _process_timer, _hot_monitor
 
@@ -171,7 +171,7 @@ class DouyuLive(BaseLive):
         main_thread.join()
 
     def upload_file(self, title, filepath, start_time_str, end_time_str, cover=None, tags=[]):
-        processor = Processor(self)
+        clipper = Clipper(self)
 
         file = os.path.basename(filepath)
         f_split = file.split("_")
@@ -182,11 +182,11 @@ class DouyuLive(BaseLive):
 
         start_offset = (start_time - file_start_time).seconds
         end_offset = (end_time - file_start_time).seconds
-        output_file = processor.process_file(filepath, start_offset, end_offset)
+        output_file = clipper.process_file(filepath, start_offset, end_offset)
         self.uploader.upload(title, [output_file], cover=cover, tags=tags)
 
     def cut_file(self, filepath, start_time_str, end_time_str):
-        processor = Processor(self)
+        clipper = Clipper(self)
 
         file = os.path.basename(filepath)
         f_split = file.split("_")
@@ -197,5 +197,5 @@ class DouyuLive(BaseLive):
 
         start_offset = (start_time - file_start_time).seconds
         end_offset = (end_time - file_start_time).seconds
-        output_file = processor.process_file(filepath, start_offset, end_offset)
+        output_file = clipper.process_file(filepath, start_offset, end_offset)
         return output_file
