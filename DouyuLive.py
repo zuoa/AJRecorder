@@ -170,6 +170,10 @@ class DouyuLive(BaseLive):
         main_thread.start()
         main_thread.join()
 
+    def clip_upload(self, title, filepath, cover=None, tags=[]):
+        clipper = Clipper(self)
+        clipper.clip(filepath)
+
     def upload_file(self, title, filepath, start_time_str, end_time_str, cover=None, tags=[]):
         clipper = Clipper(self)
 
@@ -182,7 +186,7 @@ class DouyuLive(BaseLive):
 
         start_offset = (start_time - file_start_time).seconds
         end_offset = (end_time - file_start_time).seconds
-        output_file = clipper.process_file(filepath, start_offset, end_offset)
+        output_file = clipper.clip(filepath, start_offset, end_offset)
         self.uploader.upload(title, [output_file], cover=cover, tags=tags)
 
     def cut_file(self, filepath, start_time_str, end_time_str):
@@ -197,5 +201,5 @@ class DouyuLive(BaseLive):
 
         start_offset = (start_time - file_start_time).seconds
         end_offset = (end_time - file_start_time).seconds
-        output_file = clipper.process_file(filepath, start_offset, end_offset)
+        output_file = clipper.clip(filepath, start_offset, end_offset)
         return output_file

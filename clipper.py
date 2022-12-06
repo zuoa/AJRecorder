@@ -54,7 +54,7 @@ class Clipper(object):
         self.ffmpeg = self.live.config.get('common', {}).get('ffmpeg_path', '/Users/yujian/ffmpeg')
         self.video_source_dir = self.live.config.get('common', {}).get('video_source_dir', 'video_src')
         self.video_output_dir = self.live.config.get('common', {}).get('video_output_dir', 'video_output')
-        self.split_interval = self.live.config.get('clipper', {}).get('split_interval', 1800)
+        self.clip_segment_duration = self.live.config.get('clipper', {}).get('segment_duration', 1800)
         self.split_progress_map = {}
 
     def find_source_video(self, start_time_str, end_time_str):
@@ -187,7 +187,7 @@ class Clipper(object):
         if file_name.startswith(self.live.room_id) and file_name.endswith(".flv"):
             f_split = file_name.split("_")
             duration = int(get_video_real_duration(filepath))
-            cut_duration_time = 1800
+            cut_duration_time = self.clip_segment_duration
             for offset in range(0, duration, cut_duration_time):
                 start_offset = offset
                 end_offset = start_offset + cut_duration_time
@@ -207,7 +207,19 @@ class Clipper(object):
         print(cut_files)
         return cut_files
 
-    def process_file(self, filepath, start_offset, end_offset):
+    def clip_segment_list(self, filepath):
+        file = os.path.basename(filepath)
+        f_split = file.split("_")
+        file_start_time_str = (f_split[1] + f_split[2]).replace(".flv", "")
+        duration = get_video_real_duration(filepath)
+        for offset in range(0, duration, self.clip_segment_duration):
+            start_offset = offset
+            end_offset = start_offset + self.clip_segment_duration
+            if end_offset > duration:
+                end_offset = duration
+            self.clip(filepath, start_offset, end_offset)
+
+    def clip(self, filepath, start_offset, end_offset):
 
         is_overlay_danmaku = self.live.room_config.get("clipper", {}).get("overlay_danmaku", False)
         is_hwaccel_enable = self.live.config.get('common', {}).get("hwaccel_enable", False)
@@ -271,9 +283,9 @@ class Clipper(object):
                     '{} {} {}'.format(split_command, duration, self.split_progress_map[filepath]["split_point"])))
 
                 if is_complete:
-                    finished_video = self.process_file(filepath,
-                                                       self.split_progress_map[filepath]["split_point"],
-                                                       duration)
+                    finished_video = self.clip(filepath,
+                                               self.split_progress_map[filepath]["split_point"],
+                                               duration)
                     self.split_progress_map[filepath]["split_point"] = duration
                     self.split_progress_map[filepath]["finished_videos"].append(finished_video)
 
@@ -283,11 +295,11 @@ class Clipper(object):
                         "finished_videos": self.split_progress_map[filepath]["finished_videos"],
                         "cover": cover})
                 else:
-                    if duration - self.split_progress_map[filepath]["split_point"] > self.split_interval:
-                        finished_video = self.process_file(filepath,
-                                                           self.split_progress_map[filepath]["split_point"],
-                                                           self.split_progress_map[filepath][
-                                                               "split_point"] + self.split_interval)
+                    if duration - self.split_progress_map[filepath]["split_point"] > self.clip_segment_duration:
+                        finished_video = self.clip(filepath,
+                                                   self.split_progress_map[filepath]["split_point"],
+                                                   self.split_progress_map[filepath][
+                                                       "split_point"] + self.clip_segment_duration)
 
                         self.split_progress_map[filepath]["finished_videos"].append(finished_video)
-                        self.split_progress_map[filepath]["split_point"] += self.split_interval
+                        self.split_progress_map[filepath]["split_point"] += self.clip_segment_duration
