@@ -30,7 +30,7 @@ def get_video_real_duration(filename):
     获取视频时长（s:秒）
     """
     parser = FlvParser(filename)
-    return parser.get_duration()
+    return int(parser.get_duration())
 
 
 def get_font_size(font_size, font_path, text):
