@@ -241,11 +241,11 @@ class Clipper(object):
 
         command_expand = ""
 
-        hwaccel = " -hwaccel cuda -c:v h264_cuvid " if is_hwaccel_enable else ""
+        hwaccel = " -hwaccel cuda -hwaccel_output_format cuda -c:v h264_cuvid " if is_hwaccel_enable else ""
 
         if is_overlay_danmaku:
             video_encoder = "h264_nvenc" if is_hwaccel_enable else "libx264"
-            command_expand = f" -vf ass={ass_filepath}   -s 1920x1080 -c:v {video_encoder} -c:a aac  -crf 25 -r 30 "
+            command_expand = f" -vf ass={ass_filepath}   -vf scale_npp=1920:1080 -c:v {video_encoder} -c:a aac  -crf 25 -r 30 "
         else:
             command_expand = " -c:v copy -c:a copy "
 
