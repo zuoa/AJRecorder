@@ -48,14 +48,14 @@ def ffmpeg_command(command):
 
 
 class Processor(object):
-    split_interval = 3600
-    split_progress_map = {}
 
     def __init__(self, live):
         self.live = live
         self.ffmpeg = self.live.config.get('common', {}).get('ffmpeg_path', '/Users/yujian/ffmpeg')
         self.video_source_dir = self.live.config.get('common', {}).get('video_source_dir', 'video_src')
         self.video_output_dir = self.live.config.get('common', {}).get('video_output_dir', 'video_output')
+        self.split_interval = self.live.config.get('clipper', {}).get('split_interval', 1800)
+        self.split_progress_map = {}
 
     def find_source_video(self, start_time_str, end_time_str):
         start_time = datetime.datetime.strptime(start_time_str, "%Y-%m-%d %H:%M:%S")

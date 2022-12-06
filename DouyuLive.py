@@ -91,7 +91,7 @@ class DouyuLive(BaseLive):
             recorder = FlvRecorder(self)
             recorder.run()
 
-        def _clipper(self):
+        def _hot_monitor(self):
             for trend in self.select_danmaku_trend():
                 if not trend:
                     continue
@@ -99,9 +99,9 @@ class DouyuLive(BaseLive):
                     f.write(json.dumps(trend, ensure_ascii=False) + "\n")
                     f.flush()
 
-                up_value = self.room_config.get("clipper", {}).get("up_threshold_value", 100)
-                up_radio = self.room_config.get("clipper", {}).get("up_threshold_radio", 1.5)
-                down_radio = self.room_config.get("clipper", {}).get("down_threshold_radio", 0.7)
+                up_value = self.room_config.get("hot_monitor", {}).get("up_threshold_value", 100)
+                up_radio = self.room_config.get("hot_monitor", {}).get("up_threshold_radio", 1.5)
+                down_radio = self.room_config.get("hot_monitor", {}).get("down_threshold_radio", 0.7)
 
                 if not self.clipping_start_time:
                     if trend[0]['danmaku_count'] > up_value and trend[1]['danmaku_count'] > up_value and \
@@ -129,11 +129,11 @@ class DouyuLive(BaseLive):
             processor = Processor(self)
             processor.process_scheduled()
 
-        return _danmu_monitor, _stream_recorder, _post_uploader, _process_timer, _clipper
+        return _danmu_monitor, _stream_recorder, _post_uploader, _process_timer, _hot_monitor
 
     def _run(self):
 
-        danmu_monitor, stream_recorder, post_uploader, process_timer, clipper = self._create_thread_fn()
+        danmu_monitor, stream_recorder, post_uploader, process_timer, hot_monitor = self._create_thread_fn()
 
         danmu_monitor_thread = threading.Thread(target=danmu_monitor, args=(self,))
         danmu_monitor_thread.setDaemon(True)
@@ -151,11 +151,11 @@ class DouyuLive(BaseLive):
         process_timer_thread.setDaemon(True)
         process_timer_thread.start()
 
-        clipper_thread = threading.Thread(target=clipper, args=(self,))
-        clipper_thread.setDaemon(True)
-        clipper_thread.start()
+        hot_monitor_thread = threading.Thread(target=hot_monitor, args=(self,))
+        hot_monitor_thread.setDaemon(True)
+        hot_monitor_thread.start()
 
-        clipper_thread.join()
+        hot_monitor_thread.join()
         process_timer_thread.join()
         post_uploader_thread.join()
         stream_recorder_thread.join()

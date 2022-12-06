@@ -113,7 +113,7 @@ def upload(video_path, start_offset, end_offset, cover=None):
         "enable": True,
         "recorder": {
         },
-        "clipper": {
+        "hot_monitor": {
             "enable": True,
             "interval": 30,
             "up_threshold_radio": 2,
