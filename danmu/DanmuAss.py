@@ -90,11 +90,13 @@ class AssDanmu:
         self.start_time = datetime.datetime.strptime(msg_time,
                                                      "%Y-%m-%d %H:%M:%S").timestamp() * 1000 - self.video_start_time
 
+        self.duration = DANMU_TIME + random.randint(-1000, 1000)
+
         # 直接计算的参数
-        self.end_time = self.start_time + DANMU_TIME
+        self.end_time = self.start_time + self.duration
         self.end_x = (-get_danmu_width(content)) / 2
         self.start_x = 560 - self.end_x
-        self.velocity = (self.start_x - self.end_x) / DANMU_TIME
+        self.velocity = (self.start_x - self.end_x) / self.duration
 
         # 待填写的参数
         self.y = None
@@ -121,7 +123,7 @@ class AssDanmu:
         # 追赶所需时间 = (两弹幕的距离)/(两弹幕的速度差)
         need_pursue_time = distance / (self.velocity - danmu_before.velocity)
         # 最长追赶时间 = 8秒 - 两弹幕出发的时间差（如果超过该时间，两弹幕皆已出屏幕）
-        max_pursue_time = DANMU_TIME - (self.start_time - danmu_before.start_time)
+        max_pursue_time = self.duration - (self.start_time - danmu_before.start_time)
 
         # 如果所需时间大于最长时间，则可以同轨出现；否则不能
         if need_pursue_time > max_pursue_time:
