@@ -45,7 +45,7 @@ Timer: 10.0000
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: R2L,{FONT_FAMILY},{FONT_SIZE},&H33FFFFFF,&H99FFFFFF,&H99000000,&H99000000,1,0,0,0,100,100,0,0,1,1,0,2,20,20,2,0
+Style: R2L,{FONT_FAMILY},{FONT_SIZE},&H10FFFFFF,&H99FFFFFF,&H99000000,&H99000000,1,0,0,0,100,100,0,0,1,1,0,2,20,20,2,0
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
@@ -63,7 +63,7 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
                     danmu.y = (i + 1) * DANMU_LINE_HEIGHT + DANMU_VIEWPORT_OFFSET_Y
 
                     self.fp.write(
-                        rf"Dialogue: 0,{offset_millisecond_to_datetime(danmu.start_time)},{offset_millisecond_to_datetime(danmu.end_time)},R2L,,20,20,2,,{{\1c&H33{danmu.color.replace('#', '')},\move({danmu.start_x},{danmu.y},{danmu.end_x},{danmu.y})}}{danmu.content}")
+                        rf"Dialogue: 0,{offset_millisecond_to_datetime(danmu.start_time)},{offset_millisecond_to_datetime(danmu.end_time)},R2L,,20,20,2,,{{\1c&H10{danmu.color.replace('#', '')},\move({danmu.start_x},{danmu.y},{danmu.end_x},{danmu.y})}}{danmu.content}")
                     self.fp.write("\n")
                     break
                 i += 1
