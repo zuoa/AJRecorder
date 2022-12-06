@@ -241,7 +241,7 @@ class Clipper(object):
 
         command_expand = ""
 
-        hwaccel = "-hwaccel cuda -c:v h264_cuvid " if is_hwaccel_enable else ""
+        hwaccel = " -hwaccel cuda -c:v h264_cuvid " if is_hwaccel_enable else ""
 
         if is_overlay_danmaku:
             video_encoder = "h264_nvenc" if is_hwaccel_enable else "libx264"
